@@ -11,7 +11,7 @@ This repository contains the Python code and instructions necessary to ship logs
 
 ### 1. Deploy the Logz.io Python Template👇 
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flogzio%2Flogzio-azure-serverless-py%2Fmaster%2Fdeployments%2Fazuredeploylogs.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flogzio%2Fazure-serverless%2Fserverless-function%2Fdeployments%2Fazuredeploylogs.json)
 
 This deployment will create the following services:
 * Serverless Function App (Python-based)
