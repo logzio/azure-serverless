@@ -24,23 +24,20 @@ load_dotenv()
 
 # Initialize Azure Blob Storage container client
 container_client = ContainerClient.from_connection_string(
-    conn_str=os.getenv("AzureWebJobsStorage"),  # On Azure
-    # conn_str=os.getenv("AZURE_STORAGE_CONNECTION_STRING"),  # On local
+    conn_str=os.getenv("AzureWebJobsStorage"),
     container_name=os.getenv("AZURE_STORAGE_CONTAINER_NAME")
 )
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
-# logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
 # Logz.io configuration
-# LOGZIO_URL = os.getenv("LOGZIO_LISTENER")
 LOGZIO_URL = os.getenv("LogzioURL")
-# LOGZIO_TOKEN = os.getenv("LOGZIO_TOKEN")
 LOGZIO_TOKEN = os.getenv("LogzioToken")
 HEADERS = {"Content-Type": "application/json"}
 RETRY_WAIT_FIXED = 2  # seconds for retry delay
+MAX_TRIES = int(os.getenv('MAX_TRIES', 3))
 
 # Thread and Queue Configuration
 thread_count = int(os.getenv('THREAD_COUNT', 4))
@@ -72,7 +69,7 @@ def delete_empty_fields_of_log(log):
         return log
 
 
-@backoff.on_exception(backoff.expo, requests.exceptions.RequestException, max_tries=3)
+@backoff.on_exception(backoff.expo, requests.exceptions.RequestException, max_tries=MAX_TRIES)
 def send_batch(batch_data):
     try:
         batch_str = ''.join(batch_data)

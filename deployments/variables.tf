@@ -1,6 +1,6 @@
-variable "container_name" {
+variable "failed_log_backup_container" {
   description = "The name of the blob container within the storage account."
-  default     = "logs"
+  default     = "failedlogbackup"
 }
 
 variable "logzio_url" {
@@ -38,6 +38,12 @@ variable "interval_time" {
   description = "The interval time for sending logs in milliseconds. Minimum 5000 (5 seconds), maximum 60000 (60 seconds)."
   default     = 10000
 }
+
+variable "max_tries" {
+  description = "The maximum number of retries for the backoff mechanism."
+  default     = 3
+}
+
 variable "resource_group_name" {
   default = "resources-terraform-test"
 }

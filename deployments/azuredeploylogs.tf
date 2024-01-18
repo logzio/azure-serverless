@@ -49,7 +49,7 @@ resource "azurerm_storage_account" "storage_account" {
 
 # Blob Container
 resource "azurerm_storage_container" "storage_container" {
-  name                  = var.container_name
+  name                  = var.failed_log_backup_container
   storage_account_name  = azurerm_storage_account.storage_account.name
   container_access_type = "private"
 }
@@ -104,7 +104,7 @@ resource "azurerm_linux_function_app" "function_app" {
     "THREAD_COUNT" = var.thread_count
     "BUFFER_SIZE" = var.buffer_size
     "INTERVAL_TIME" = var.interval_time
-
+    "MAX_TRIES" = var.max_tries
   }
 }
 
