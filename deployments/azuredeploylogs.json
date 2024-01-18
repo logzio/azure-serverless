@@ -3,9 +3,9 @@
     "contentVersion": "1.0.0.0",
     "parameters":
     {
-        "ContainerName":
+        "FailedLogBackupContainer":
         {
-            "defaultValue": "logs",
+            "defaultValue": "failedlogbackup",
             "minLength": 3,
             "maxLength": 63,
             "type": "string",
@@ -119,6 +119,16 @@
             {
                 "description": "The interval time for sending logs in milliseconds. Minimum 5000 (5 seconds), maximum 60000 (60 seconds)."
             }
+        },
+        "MaxTries": {
+            "type": "int",
+            "defaultValue": 3,
+            "minValue": 1,
+            "maxValue": 8,
+            "metadata":
+            {
+                "description": "The maximum number of retries for the backoff mechanism."
+            }
         }
     },
     "variables":
@@ -157,7 +167,7 @@
             {
               "type": "blobServices/containers",
               "apiVersion": "2021-02-01",
-              "name": "[concat('default/', parameters('ContainerName'))]",
+              "name": "[concat('default/', parameters('FailedLogBackupContainer'))]",
               "properties": {},
               "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts/', parameters('FunctionAppStorageAccountName'))]"
@@ -242,7 +252,7 @@
                         },
                         {
                             "name": "AZURE_STORAGE_CONTAINER_NAME",
-                            "value": "[parameters('ContainerName')]"
+                            "value": "[parameters('FailedLogBackupContainer')]"
                         },
                         {
                             "name": "THREAD_COUNT",
@@ -255,6 +265,10 @@
                         {
                             "name": "INTERVAL_TIME",
                             "value": "[parameters('intervalTime')]"
+                        },
+                        {
+                            "name": "MAX_TRIES",
+                            "value": "[parameters('MaxTries')]"
                         }
                     ]
                 }
