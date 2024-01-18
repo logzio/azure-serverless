@@ -45,6 +45,7 @@ As an alternative to the Azure Template, you can use Terraform to set up your lo
     buffer_size = 100
     interval_time = 10000
     max_tries = 3
+    log_type = "eventHub"
    
 3. **Initialize Terraform**: Run the Terraform initialization to install necessary plugins.
    ```bash
@@ -72,6 +73,8 @@ Use these settings when configuring the template:
 | bufferSize      | Maximum number of messages to accumulate before sending (default: 100). |
 | intervalTime    | Interval time for sending logs in milliseconds (default: 10000).        |
 | maxTries        | The maximum number of retries for the backoff mechanism (default: 3).   |
+| logType         | The type of the logs being processed (default: eventHub).               |
+
 
 *Required fields.
 

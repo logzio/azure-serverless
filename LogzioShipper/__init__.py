@@ -38,6 +38,7 @@ LOGZIO_TOKEN = os.getenv("LogzioToken")
 HEADERS = {"Content-Type": "application/json"}
 RETRY_WAIT_FIXED = 2  # seconds for retry delay
 MAX_TRIES = int(os.getenv('MAX_TRIES', 3))
+LOG_TYPE = os.getenv('LOG_TYPE', "eventHub")
 
 # Thread and Queue Configuration
 thread_count = int(os.getenv('THREAD_COUNT', 4))
@@ -73,7 +74,7 @@ def delete_empty_fields_of_log(log):
 def send_batch(batch_data):
     try:
         batch_str = ''.join(batch_data)
-        response = session.post(LOGZIO_URL, params={"token": LOGZIO_TOKEN, "type": "eventHub"}, headers=HEADERS, data=batch_str)
+        response = session.post(LOGZIO_URL, params={"token": LOGZIO_TOKEN, "type": LOG_TYPE}, headers=HEADERS, data=batch_str)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to send batch: {e}")
@@ -95,14 +96,14 @@ def batch_creator(azeventhub):
         # Check the batch size or time interval after processing all logs from the event
         current_time = time.time()
         if len(local_log_batch) >= BUFFER_SIZE or (current_time - last_batch_time) >= INTERVAL_TIME:
-            print(f"Adding batch of size {len(local_log_batch)} to the sending queue.")
+            logging.info(f"Adding batch of size {len(local_log_batch)} to the sending queue.")
             batch_queue.put(list(local_log_batch))  # Put a copy of the batch
             local_log_batch.clear()  # Clear the local batch
             last_batch_time = current_time
 
     # Check and send any remaining logs in the batch after processing all events
     if local_log_batch:
-        print(f"Adding batch of size {len(local_log_batch)} to the sending queue.")
+        logging.info(f"Adding batch of size {len(local_log_batch)} to the sending queue.")
         batch_queue.put(list(local_log_batch))  # Put a copy of the batch
         local_log_batch.clear()  # Clear the local batch
 

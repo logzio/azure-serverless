@@ -44,6 +44,11 @@ variable "max_tries" {
   default     = 3
 }
 
+variable "log_type" {
+  description = "The type of the logs being processed."
+  default = "eventHub"
+}
+
 variable "resource_group_name" {
   default = "resources-terraform-test"
 }

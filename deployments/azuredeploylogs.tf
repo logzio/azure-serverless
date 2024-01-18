@@ -1,5 +1,5 @@
 provider "azurerm" {
-features {}
+  features {}
 }
 # Storage Account
 resource "random_string" "random_suffix" {
@@ -54,6 +54,7 @@ resource "azurerm_storage_account" "storage_account" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
   access_tier              = "Hot"
+  enable_https_traffic_only = true
 }
 
 # Blob Container
@@ -114,6 +115,7 @@ resource "azurerm_linux_function_app" "function_app" {
     "BUFFER_SIZE" = var.buffer_size
     "INTERVAL_TIME" = var.interval_time
     "MAX_TRIES" = var.max_tries
+    "LOG_TYPE" = var.log_type
   }
 }
 

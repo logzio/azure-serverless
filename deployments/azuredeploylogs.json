@@ -129,6 +129,13 @@
             {
                 "description": "The maximum number of retries for the backoff mechanism."
             }
+        },
+        "LogType": {
+            "defaultValue": "eventHub",
+            "type": "string",
+            "metadata": {
+                "description": "The type of the logs being processed."
+            }
         }
     },
     "variables":
@@ -269,6 +276,10 @@
                         {
                             "name": "MAX_TRIES",
                             "value": "[parameters('MaxTries')]"
+                        },
+                        {
+                            "name": "LOG_TYPE",
+                            "value": "[parameters('LogType')]"
                         }
                     ]
                 }
