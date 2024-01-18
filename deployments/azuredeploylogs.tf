@@ -24,10 +24,19 @@ resource "azurerm_eventhub_namespace" "eventhub_namespace" {
   maximum_throughput_units = 20
 }
 
+# Null resource to enforce ordering
+resource "null_resource" "wait_for_namespace" {
+  depends_on = [azurerm_eventhub_namespace.eventhub_namespace]
+}
+
+# Data source for authorization rule
 data "azurerm_eventhub_namespace_authorization_rule" "example" {
   name                = "RootManageSharedAccessKey"
-  namespace_name      = var.eventhub_namespace
+  namespace_name      = azurerm_eventhub_namespace.eventhub_namespace.name
   resource_group_name = var.resource_group_name
+
+  # Enforce dependency via null_resource
+  depends_on = [null_resource.wait_for_namespace]
 }
 
 locals {
