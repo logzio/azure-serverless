@@ -152,4 +152,4 @@ def main(azeventhub: List[func.EventHubEvent]):
     start_batch_senders(thread_count=thread_count)
     batch_creator_thread.join()
     backup_container.upload_files()  # Ensure any remaining files are uploaded
-    logging.info('EventHub trigger processing complete')
+    logging.info('EventHub trigger processing complete.')
