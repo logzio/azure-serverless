@@ -3,7 +3,8 @@ name: Deploy Azure Function
 on:
   push:
     branches:
-      - master  # Set your default branch here
+      - master
+      - serverless-function
 
 jobs:
   build-and-deploy:
