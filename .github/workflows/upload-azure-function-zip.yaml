@@ -24,17 +24,6 @@ jobs:
       - name: Install Azure Functions Core Tools
         run: npm i -g azure-functions-core-tools@4 --unsafe-perm true
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.11'
-
-      - name: Replace version in ARM Template
-        run: sed -i "s/<<VERSION>>/${{ github.event.release.tag_name }}/" deployments/azuredeploylogs.json
-
-      - name: Replace version in README
-        run: sed -i "s/<<VERSION>>/${{ github.event.release.tag_name }}/" README.md
-
       - name: Create zip file with specific files
         run: |
           mkdir logzio_function
@@ -47,4 +36,4 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az storage blob upload --overwrite true --account-name logzioblobtrigger --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} -f logzio_function/logzio_function.zip -c eventhub -n logzio_function.zip
+            az storage blob upload --account-name logzioblobtrigger --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} -f logzio_function/logzio_function.zip -c eventhub -n logzio_function-${{ github.event.release.tag_name }}.zip

@@ -103,7 +103,7 @@ To modify configuration after deployment, visit your Function App's 'Configurati
 
 ## Changelog
 
-- Version: <<VERSION>>:
+- Version 0.0.1:
   * Initial release with Python Azure Function.
   * Implement log shipping to Logz.io.
   * Backup mechanism for failed log shipments.
