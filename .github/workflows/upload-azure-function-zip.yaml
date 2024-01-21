@@ -1,53 +1,47 @@
-name: Deploy Azure Function
+name: upload Azure function zip to Azure storage account
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
       - serverless-function
 
 jobs:
-  build-and-deploy:
+  upload-azure-function-zip:
     runs-on: ubuntu-latest
     steps:
-    - name: 'Checkout GitHub Action'
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: 'Set up Node.js'
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'  # Choose the Node.js version that suits your project
+      - name: Azure Login
+        uses: azure/actions/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: 'Install Azure Functions Core Tools'
-      run: sudo npm i -g azure-functions-core-tools@4 --unsafe-perm true
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
 
-    - name: 'Set up Python'
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.11'  # Set your Python version here
+      - name: Install Azure Functions Core Tools
+        run: npm i -g azure-functions-core-tools@4 --unsafe-perm true
 
-    - name: 'Install dependencies'
-      run: pip install -r requirements.txt
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'  # Ensure this matches the version used for your function
 
-    - name: 'Create directory and copy files'
-      run: |
-        mkdir logzio_function
-        cp host.json requirements.txt logzio_function/
-        cp -r LogzioShipper logzio_function/
+      - name: Create zip file with specific files
+        run: |
+          mkdir logzio_function
+          cp host.json requirements.txt logzio_function/
+          cp -r LogzioShipper logzio_function/
+          cd logzio_function
+          func pack --build-native-deps --python
 
-    - name: 'Package Function'
-      run: func pack --build-native-deps --python
-
-    - name: 'Zip the function app'
-      run: zip -r logzio_function.zip logzio_function
-
-    - name: 'Set up Azure CLI'
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: 'Upload to Azure'
-      run: az storage blob upload --overwrite true --account-name logzioblobtrigger --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} -f logzio_function.zip -c eventhub -n logzio_function.zip
-
-    - name: 'Logout of Azure CLI'
-      run: az logout
+      - name: Upload 'logzio_function' zip file to Azure storage
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az storage blob upload --overwrite true --account-name logzioblobtrigger --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} -f logzio_function.zip -c eventhub -n logzio_function.zip
