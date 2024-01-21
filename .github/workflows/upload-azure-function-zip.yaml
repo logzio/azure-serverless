@@ -1,11 +1,8 @@
 name: upload Azure function zip to Azure storage account
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - master
-      - serverless-function
+  release:
+    types: [published]
 
 jobs:
   upload-azure-function-zip:
@@ -30,7 +27,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.11'  # Ensure this matches the version used for your function
+          python-version: '3.11'
+
+      - name: Replace version in ARM Template
+        run: sed -i "s/<<VERSION>>/${{ github.event.release.tag_name }}/" deployments/azuredeploylogs.json
+
+      - name: Replace version in README
+        run: sed -i "s/<<VERSION>>/${{ github.event.release.tag_name }}/" README.md
 
       - name: Create zip file with specific files
         run: |
@@ -39,7 +42,6 @@ jobs:
           cp -r LogzioShipper logzio_function/
           cd logzio_function
           func pack --build-native-deps --python
-          ls -l  # List files to confirm creation of the zip file
 
       - name: Upload 'logzio_function' zip file to Azure storage
         uses: azure/CLI@v1
