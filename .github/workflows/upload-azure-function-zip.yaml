@@ -24,6 +24,11 @@ jobs:
       - name: Install Azure Functions Core Tools
         run: npm i -g azure-functions-core-tools@4 --unsafe-perm true
 
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
+
       - name: Create zip file with specific files
         run: |
           mkdir logzio_function
