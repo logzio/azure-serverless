@@ -105,7 +105,7 @@ resource "azurerm_linux_function_app" "function_app" {
     "FUNCTIONS_EXTENSION_VERSION" = "~4"
     "AzureWebJobsEventHubConnectionString" = local.eventhub_connection_string
     "AzureWebJobsStorage" = azurerm_storage_account.storage_account.primary_connection_string
-    "WEBSITE_RUN_FROM_PACKAGE" = "https://logzioblobtrigger.blob.core.windows.net/eventhub/logzio_function.zip"
+    "WEBSITE_RUN_FROM_PACKAGE" = "https://logzioblobtrigger.blob.core.windows.net/eventhub/logzio_function-v0.0.1.zip"
     "LogzioURL" = var.logzio_url
     "LogzioToken" = var.logzio_token
     "EventhubLogsName" = var.eventhub_logs_name
