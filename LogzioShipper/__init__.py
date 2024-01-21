@@ -33,15 +33,15 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 
 
 # Logz.io configuration
-LOGZIO_URL = os.getenv("LogzioURL")
-LOGZIO_TOKEN = os.getenv("LogzioToken")
+ENV_LOGZIO_URL = os.getenv("LogzioURL")
+ENV_LOGZIO_TOKEN = os.getenv("LogzioToken")
 HEADERS = {"Content-Type": "application/json"}
 RETRY_WAIT_FIXED = 2  # seconds for retry delay
-MAX_TRIES = int(os.getenv('MAX_TRIES', 3))
-LOG_TYPE = os.getenv('LOG_TYPE', "eventHub")
+ENV_MAX_TRIES = int(os.getenv('MAX_TRIES', 3))
+ENV_LOG_TYPE = os.getenv('LOG_TYPE', "eventHub")
 
 # Thread and Queue Configuration
-thread_count = int(os.getenv('THREAD_COUNT', 4))
+ENV_THREAD_COUNT = int(os.getenv('THREAD_COUNT', 4))
 batch_queue = Queue()
 
 # Backup Container
@@ -51,8 +51,8 @@ backup_container = BackupContainer(logging, container_client)
 session = Session()
 
 # Constants for batching logs
-BUFFER_SIZE = int(os.getenv('BUFFER_SIZE', 100))  # Batch size
-INTERVAL_TIME = int(os.getenv('INTERVAL_TIME', 10000)) / 1000  # Interval time in seconds
+ENV_BUFFER_SIZE = int(os.getenv('BUFFER_SIZE', 100))  # Batch size
+ENV_INTERVAL_TIME = int(os.getenv('INTERVAL_TIME', 10000)) / 1000  # Interval time in seconds
 
 
 def add_timestamp(log):
@@ -70,11 +70,11 @@ def delete_empty_fields_of_log(log):
         return log
 
 
-@backoff.on_exception(backoff.expo, requests.exceptions.RequestException, max_tries=MAX_TRIES)
+@backoff.on_exception(backoff.expo, requests.exceptions.RequestException, max_tries=ENV_MAX_TRIES)
 def send_batch(batch_data):
     try:
         batch_str = ''.join(batch_data)
-        response = session.post(LOGZIO_URL, params={"token": LOGZIO_TOKEN, "type": LOG_TYPE}, headers=HEADERS, data=batch_str)
+        response = session.post(ENV_LOGZIO_URL, params={"token": ENV_LOGZIO_TOKEN, "type": ENV_LOG_TYPE}, headers=HEADERS, data=batch_str)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to send batch: {e}")
@@ -95,7 +95,7 @@ def batch_creator(azeventhub):
 
         # Check the batch size or time interval after processing all logs from the event
         current_time = time.time()
-        if len(local_log_batch) >= BUFFER_SIZE or (current_time - last_batch_time) >= INTERVAL_TIME:
+        if len(local_log_batch) >= ENV_BUFFER_SIZE or (current_time - last_batch_time) >= ENV_INTERVAL_TIME:
             logging.info(f"Adding batch of size {len(local_log_batch)} to the sending queue.")
             batch_queue.put(list(local_log_batch))  # Put a copy of the batch
             local_log_batch.clear()  # Clear the local batch
@@ -149,7 +149,7 @@ def process_eventhub_message(event):
 def main(azeventhub: List[func.EventHubEvent]):
     batch_creator_thread = Thread(target=batch_creator, args=(azeventhub,), daemon=True)
     batch_creator_thread.start()
-    start_batch_senders(thread_count=thread_count)
+    start_batch_senders(thread_count=ENV_THREAD_COUNT)
     batch_creator_thread.join()
     backup_container.upload_files()  # Ensure any remaining files are uploaded
     logging.info('EventHub trigger processing complete.')
