@@ -27,8 +27,7 @@ jobs:
         python-version: '3.11'  # Set your Python version here
 
     - name: 'Install dependencies'
-      run: |
-        pip install -r requirements.txt
+      run: pip install -r requirements.txt
 
     - name: 'Create directory and copy files'
       run: |
@@ -36,19 +35,19 @@ jobs:
         cp host.json requirements.txt logzio_function/
         cp -r LogzioShipper logzio_function/
 
-        - name: 'Package Function'
-          run: func pack --build-native-deps --python
+    - name: 'Package Function'
+      run: func pack --build-native-deps --python
 
-        - name: 'Zip the function app'
-          run: zip -r logzio_function.zip logzio_function
+    - name: 'Zip the function app'
+      run: zip -r logzio_function.zip logzio_function
 
-        - name: 'Set up Azure CLI'
-          uses: azure/login@v1
-          with:
-            creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: 'Set up Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-        - name: 'Upload to Azure'
-          run: az storage blob upload --overwrite true --account-name logzioblobtrigger --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} -f logzio_function.zip -c eventhub -n logzio_function.zip
+    - name: 'Upload to Azure'
+      run: az storage blob upload --overwrite true --account-name logzioblobtrigger --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} -f logzio_function.zip -c eventhub -n logzio_function.zip
 
-        - name: 'Logout of Azure CLI'
-          run: az logout
+    - name: 'Logout of Azure CLI'
+      run: az logout
