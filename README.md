@@ -7,6 +7,10 @@ This repository contains the Python code and instructions to ship logs from your
 
 ![Integration-architecture](img/logzio-evethub-Diagram.png)
 
+## Deployment methods:
+* [Deploy via Azure ARM Template](#1-deploy-the-logzio-python-template)
+* [Deploy via Terraform](#alternative-setup-using-terraform)
+
 ## Setting up Log Shipping from Azure
 
 ### 1. Deploy the Logz.io Python Template👇 
@@ -22,44 +26,6 @@ This deployment will create the following services:
   - Failed shipments logs container
 * App Service Plan
 * Application Insights
-
-### Alternative Setup using Terraform
-
-As an alternative to the Azure Template, you can use Terraform to set up your log shipping environment. The Terraform configuration files are located in the **deployments** folder of this repository. Follow the instructions below to deploy this integration using Terraform.
-
-#### Prerequisites
-- Terraform installed on your local machine.
-- Azure CLI installed and configured with your Azure account credentials.
-
-#### Steps to Deploy using Terraform
-1. **Obtain the Terraform Configuration**: Clone or download this repository to get the Terraform configuration files.
-   ```bash
-   git clone https://github.com/logzio/azure-serverless.git
-   cd azure-serverless/deployments
-   ```
-
-2. **Create a `.tfvars` File**: Create a `terraform.tfvars` file in the **deployments** folder to specify your configurations, such as your Logz.io token.
-    ```hcl
-    logzio_url = "<your-logzio-account-listener-host>:8071"
-    logzio_token = "<your-logzio-log-shipping-token>"
-    thread_count = 4
-    buffer_size = 100
-    interval_time = 10000
-    max_tries = 3
-    log_type = "eventHub"
-   
-3. **Initialize Terraform**: Run the Terraform initialization to install the necessary plugins.
-   ```bash
-    terraform init
-   ```
-
-4. **Apply Terraform Configuration**: Deploy the infrastructure using `terraform apply`. You will be prompted to review the proposed changes before applying the configuration.
-   ```bash
-    terraform apply
-   ```
-    Type **yes** when prompted to confirm the deployment.
-5. **Verify Deployment**: After successful application of the Terraform configuration, your Azure services will be set up and ready for log shipping.
-
 
 ### 2. Configure the Template
 
@@ -103,9 +69,51 @@ The deployment includes a backup mechanism for logs that fail to ship to Logz.io
 
 To modify configuration after deployment, visit your Function App's **Configuration** tab. You can adjust settings such as `LogzioURL`, `LogzioToken`, `bufferSize`, and more.
 
+---
+
+## Alternative Setup using Terraform
+
+As an alternative to the Azure Template, you can use Terraform to set up your log shipping environment. The Terraform configuration files are located in the **deployments** folder of this repository. Follow the instructions below to deploy this integration using Terraform.
+
+#### Prerequisites
+- Terraform installed on your local machine.
+- Azure CLI installed and configured with your Azure account credentials.
+
+#### Steps to Deploy using Terraform
+1. **Obtain the Terraform Configuration**: Use curl to download only the azuredeploylogs.tf and variables.tf files from the GitHub repository.
+
+   ```bash
+    curl -O https://raw.githubusercontent.com/logzio/azure-serverless/master/deployments/azuredeploylogs.tf \
+   &&
+   curl -O https://raw.githubusercontent.com/logzio/azure-serverless/master/deployments/variables.tf
+   ```
+
+2. **Create a `.tfvars` File**: Create a `terraform.tfvars` file in the same folder to specify your configurations, such as your Logz.io token.
+    ```hcl
+    logzio_url = "https://<<LISTENER-HOST>>:8071"
+    logzio_token = "<<LOG-SHIPPING-TOKEN>>"
+    thread_count = 4
+    buffer_size = 100
+    interval_time = 10000
+    max_tries = 3
+    log_type = "eventHub"
+   
+3. **Initialize Terraform**: Run the Terraform initialization to install the necessary plugins.
+   ```bash
+    terraform init
+   ```
+
+4. **Apply Terraform Configuration**: Deploy the infrastructure using `terraform apply`. You will be prompted to review the proposed changes before applying the configuration.
+   ```bash
+    terraform apply
+   ```
+    Type **yes** when prompted to confirm the deployment.
+5. **Verify Deployment**: After successful application of the Terraform configuration, your Azure services will be set up and ready for log shipping.
+
+---
 ## Changelog
 
-- Version 0.0.1:
+- 0.0.1:
   * Initial release with Python Azure Function.
   * Implement log shipping to Logz.io.
   * Backup mechanism for failed log shipments.
