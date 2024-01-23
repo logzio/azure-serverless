@@ -3,7 +3,7 @@
 ---
 
 # azure-serverless
-This repository contains the Python code and instructions necessary to ship logs from your Azure services to Logz.io using an Azure Function. After completing the setup, your Azure Function will forward logs from an Azure Event Hub to your Logz.io account.
+This repository contains the Python code and instructions to ship logs from your Azure services to Logz.io using an Azure Function. After completing the setup, your Azure Function will forward logs from an Azure Event Hub to your Logz.io account.
 
 ![Integration-architecture](img/logzio-evethub-Diagram.png)
 
@@ -25,7 +25,7 @@ This deployment will create the following services:
 
 ### Alternative Setup using Terraform
 
-As an alternative to the Azure Template, you can use Terraform to set up your log shipping environment. The Terraform configuration files are located in the **'deployments'** folder of this repository. Follow the instructions below to deploy using Terraform.
+As an alternative to the Azure Template, you can use Terraform to set up your log shipping environment. The Terraform configuration files are located in the **deployments** folder of this repository. Follow the instructions below to deploy this integration using Terraform.
 
 #### Prerequisites
 - Terraform installed on your local machine.
@@ -36,22 +36,24 @@ As an alternative to the Azure Template, you can use Terraform to set up your lo
    ```bash
    git clone https://github.com/logzio/azure-serverless.git
    cd azure-serverless/deployments
+   ```
 
-2. **Create a `.tfvars` File**: Create a `terraform.tfvars` file in the **'deployments'** folder to specify your configurations, such as your Logz.io token.
+2. **Create a `.tfvars` File**: Create a `terraform.tfvars` file in the **deployments** folder to specify your configurations, such as your Logz.io token.
     ```hcl
-    logzio_url = "https://listener.logz.io:8071"
-    logzio_token = "<your-logzio-token>"
+    logzio_url = "<your-logzio-account-listener-host>:8071"
+    logzio_token = "<your-logzio-log-shipping-token>"
     thread_count = 4
     buffer_size = 100
     interval_time = 10000
     max_tries = 3
     log_type = "eventHub"
    
-3. **Initialize Terraform**: Run the Terraform initialization to install necessary plugins.
+3. **Initialize Terraform**: Run the Terraform initialization to install the necessary plugins.
    ```bash
     terraform init
+   ```
 
-4. **Apply Terraform Configuration**: Deploy the infrastructure using `terraform apply`. You will be prompted to review the proposed changes before applying.
+4. **Apply Terraform Configuration**: Deploy the infrastructure using `terraform apply`. You will be prompted to review the proposed changes before applying the configuration.
    ```bash
     terraform apply
    ```
@@ -85,7 +87,7 @@ After setting the parameters, click **Review + Create**, and then **Create** to 
 Configure your Azure services to stream logs to the newly created Event Hub. For each service:
 
 1. Create diagnostic settings.
-2. Under 'Event hub policy name', select the appropriate policy (e.g., 'RootManageSharedAccessKey').
+2. Under **Event hub policy name**, select the appropriate policy (e.g., 'RootManageSharedAccessKey').
 
 For more details, see [Microsoft's documentation](https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitor-stream-monitoring-data-event-hubs).
 
@@ -95,11 +97,11 @@ Allow some time for data to flow from Azure to Logz.io, then check your Logz.io 
 
 ### Backup for Unshipped Logs
 
-The deployment includes a backup mechanism for logs that fail to ship to Logz.io. By default, these logs are stored in the **'failedlogbackup'** blob container, but this can be customized to a different container name of your choice during the setup process.
+The deployment includes a backup mechanism for logs that fail to ship to Logz.io. By default, these logs are stored in the **failedlogbackup** blob container, but this can be customized to a different container name of your choice during the setup process.
 
 ### Post-Deployment Configuration
 
-To modify configuration after deployment, visit your Function App's 'Configuration' tab. You can adjust settings such as LogzioURL, LogzioToken, bufferSize, and more.
+To modify configuration after deployment, visit your Function App's **Configuration** tab. You can adjust settings such as `LogzioURL`, `LogzioToken`, `bufferSize`, and more.
 
 ## Changelog
 
