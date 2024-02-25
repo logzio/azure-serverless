@@ -5,7 +5,7 @@
 # azure-serverless
 This repository contains the Python code and instructions to ship logs from your Azure services to Logz.io using an Azure Function. After completing the setup, your Azure Function will forward logs from an Azure Event Hub to your Logz.io account.
 
-![Integration-architecture](img/logzio-evethub-Diagram.png)
+![Integration-architecture](img/logzio-eventhub-diagram.svg)
 
 ## Deployment methods:
 * [Deploy via Azure ARM Template](#1-deploy-the-logzio-python-template)
@@ -25,6 +25,7 @@ This deployment will create the following services:
   - Function's logs containers
   - Failed shipments logs container
 * App Service Plan
+* Log Analytics Workspace
 * Application Insights
 
 ### 2. Configure the Template

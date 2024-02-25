@@ -119,6 +119,13 @@ resource "azurerm_linux_function_app" "function_app" {
   }
 }
 
+# Log Analytics Workspace
+resource "azurerm_log_analytics_workspace" "log_analytics_workspace" {
+  name                = var.log_analytics_workspace_name
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = var.resource_group_name
+  sku                 = "PerGB2018"
+}
 
 # Application Insights
 resource "azurerm_application_insights" "app_insights" {

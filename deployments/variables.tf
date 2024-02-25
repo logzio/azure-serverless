@@ -11,7 +11,7 @@ variable "logzio_url" {
 variable "logzio_token" {
   description = "Your Logz.io logs token."
   type        = string
-  default     = ""  # Default empty, user must provide}
+  default     = ""  # Default empty, user must provide
 }
 
 variable "eventhub_namespace" {
@@ -22,6 +22,15 @@ variable "eventhub_namespace" {
 variable "eventhub_logs_name" {
   description = "Event Hub Logs Name."
   default     = "logzioeventhub"
+}
+
+variable "app_insights_name" {
+  description = "App Insights name"
+  default     = "logzioLInsight"
+}
+variable "log_analytics_workspace_name" {
+  description = "Log Analytics Workspace Name"
+  default     = "logzioWorkspace"
 }
 
 variable "thread_count" {

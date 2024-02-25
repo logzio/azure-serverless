@@ -70,6 +70,16 @@
             "defaultValue": "logzioeventhub",
             "type": "string"
         },
+        "AppInsightsName": 
+        {
+            "defaultValue":"[concat('logzioLInsight', uniqueString(resourceGroup().id))]",
+            "type": "string"
+        },
+        "LogAnalyticsWorkspaceName": 
+        {
+            "defaultValue": "[concat('logzioWorkspace', uniqueString(resourceGroup().id))]",
+            "type": "string"
+        },
         "location":
         {
             "type": "string",
@@ -141,8 +151,7 @@
     "variables":
     {
         "functionAppId": "[resourceId('Microsoft.Web/sites', variables('FunctionAppName'))]",
-        "FunctionAppName": "[concat('logzioLFunctionApp', uniqueString(resourceGroup().id))]",
-        "AppInsightsName": "[variables('FunctionAppName')]"
+        "FunctionAppName": "[concat('logzioLFunctionApp', uniqueString(resourceGroup().id))]"
     },
     "resources":
     [
@@ -251,7 +260,7 @@
                         },
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2020-02-02-preview').InstrumentationKey]"
+                            "value": "[reference(resourceId('Microsoft.Insights/components', parameters('AppInsightsName')), '2020-02-02-preview').InstrumentationKey]"
                         },
                         {
                             "name": "AzureWebJobsFeatureFlags",
@@ -318,14 +327,29 @@
             ]
         },
         {
+			"type": "Microsoft.OperationalInsights/workspaces",
+			"apiVersion": "2021-12-01-preview",
+			"name": "[parameters('LogAnalyticsWorkspaceName')]",
+			"location": "[parameters('location')]",
+			"properties": {
+				"sku": {
+				  "name": "PerGB2018"
+				}
+			}
+		},
+        {
+            "name": "[parameters('AppInsightsName')]",
             "type": "Microsoft.Insights/components",
-            "apiVersion": "2020-02-02-preview",
-            "name": "[variables('AppInsightsName')]",
+            "apiVersion": "2020-02-02",
             "location": "[parameters('location')]",
             "kind": "web",
-            "properties":
-            {
-                "Application_Type": "web"
+			"dependsOn": [
+				"[resourceId('Microsoft.OperationalInsights/workspaces', parameters('LogAnalyticsWorkspaceName'))]"
+			],
+            "properties": {
+              "Application_Type": "web",
+              "applicationId": "[parameters('AppInsightsName')]",
+			  "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('LogAnalyticsWorkspaceName'))]"
             }
         }
     ]
