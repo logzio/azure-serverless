@@ -1,0 +1,18 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "type": "eventHubTrigger",
+      "name": "azeventhub",
+      "direction": "in",
+      "eventHubName": "%EventhubLogsName%",
+      "connection": "AzureWebJobsEventHubConnectionString",
+      "cardinality": "many",
+      "retry": {
+            "strategy": "fixedDelay",
+            "maxRetryCount": 0,
+            "delayInterval": "00:00:10"
+        }
+    }
+  ]
+}

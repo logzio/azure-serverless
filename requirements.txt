@@ -1,0 +1,15 @@
+# DO NOT include azure-functions-worker in this file
+# The Python Worker is managed by Azure Functions platform
+# Manually managing azure-functions-worker may cause unexpected issues
+
+# Azure Functions framework
+azure-functions==1.17.0
+
+applicationinsights
+
+# Azure Blob Storage SDK for backup container functionality
+azure-storage-blob==12.19.0
+
+# Utilities and helpers
+python-dotenv==1.0.0
+backoff==2.2.1

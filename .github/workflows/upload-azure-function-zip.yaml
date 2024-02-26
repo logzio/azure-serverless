@@ -1,0 +1,44 @@
+name: upload Azure function zip to Azure storage account
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  upload-azure-function-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/actions/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Install Azure Functions Core Tools
+        run: npm i -g azure-functions-core-tools@4 --unsafe-perm true
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11'
+
+      - name: Create zip file with specific files
+        run: |
+          mkdir logzio_function
+          cp host.json requirements.txt logzio_function/
+          cp -r LogzioShipper logzio_function/
+          cd logzio_function
+          func pack --build-native-deps --python
+
+      - name: Upload 'logzio_function' zip file to Azure storage
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az storage blob upload --account-name logzioblobtrigger --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} -f logzio_function/logzio_function.zip -c eventhub -n logzio_function-${{ github.event.release.tag_name }}.zip
