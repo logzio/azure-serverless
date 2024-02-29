@@ -11,5 +11,5 @@ applicationinsights
 azure-storage-blob==12.19.0
 
 # Utilities and helpers
-python-dotenv==1.0.0
+python-dotenv==1.0.1
 backoff==2.2.1
