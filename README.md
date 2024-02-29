@@ -114,6 +114,9 @@ As an alternative to the Azure Template, you can use Terraform to set up your lo
 ---
 ## Changelog
 
+- 0.0.2:
+  * Added `ENV_FUNCTION_VERSION` parameter for dynamic versioning in ARM template and Terraform.
+
 - 0.0.1:
   * Initial release with Python Azure Function.
   * Implement log shipping to Logz.io.
