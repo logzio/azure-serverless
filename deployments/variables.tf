@@ -1,3 +1,8 @@
+variable "function_app_version" {
+  description = "The version of the function app being deployed."
+  default     = "1.0.0"
+}
+
 variable "failed_log_backup_container" {
   description = "The name of the blob container within the storage account."
   default     = "failedlogbackup"

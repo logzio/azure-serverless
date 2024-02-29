@@ -101,6 +101,7 @@ resource "azurerm_linux_function_app" "function_app" {
   }
 
   app_settings = {
+    "FUNCTION_VERSION" = var.function_app_version
     "FUNCTIONS_WORKER_RUNTIME" = "python"
     "FUNCTIONS_EXTENSION_VERSION" = "~4"
     "AzureWebJobsEventHubConnectionString" = local.eventhub_connection_string
