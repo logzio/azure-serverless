@@ -39,6 +39,7 @@ HEADERS = {"Content-Type": "application/json"}
 RETRY_WAIT_FIXED = 2  # seconds for retry delay
 ENV_MAX_TRIES = int(os.getenv('MAX_TRIES', 3))
 ENV_LOG_TYPE = os.getenv('LOG_TYPE', "eventHub")
+ENV_FUNCTION_VERSION = os.getenv('FUNCTION_VERSION', '1.0.0')
 
 # Thread and Queue Configuration
 ENV_THREAD_COUNT = int(os.getenv('THREAD_COUNT', 4))
@@ -135,8 +136,15 @@ def process_eventhub_message(event):
         logs = []
         for line in message_body.splitlines():
             log_entry = json.loads(line)
+            
+            # Append version number to log
+            log_entry['function_version'] = ENV_FUNCTION_VERSION
+
             # Check if this log entry contains nested logs under 'records'
             if 'records' in log_entry and isinstance(log_entry['records'], list):
+                for record in log_entry['records']:
+                    # Ensure nested logs also include the version number
+                    record['function_version'] = ENV_FUNCTION_VERSION
                 logs.extend(log_entry['records'])  # Add nested logs individually
             else:
                 logs.append(log_entry)

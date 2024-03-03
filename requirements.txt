@@ -3,7 +3,7 @@
 # Manually managing azure-functions-worker may cause unexpected issues
 
 # Azure Functions framework
-azure-functions==1.17.0
+azure-functions==1.18.0
 
 applicationinsights
 
@@ -11,5 +11,5 @@ applicationinsights
 azure-storage-blob==12.19.0
 
 # Utilities and helpers
-python-dotenv==1.0.0
+python-dotenv==1.0.1
 backoff==2.2.1
