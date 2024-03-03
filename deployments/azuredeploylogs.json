@@ -251,7 +251,7 @@
                         },
                         {
                             "name": "WEBSITE_RUN_FROM_PACKAGE",
-                            "value": "https://logzioblobtrigger.blob.core.windows.net/eventhub/logzio_function-v0.0.1.zip"
+                            "value": "https://logzioblobtrigger.blob.core.windows.net/eventhub/logzio_function-v0.0.2.zip"
                         },
                         {
                             "name": "LogzioURL",
