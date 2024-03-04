@@ -5,7 +5,7 @@
     {
         "FunctionAppVersion": {
             "type": "string",
-            "defaultValue": "1.0.0",
+            "defaultValue": "[deployment().properties.template.contentVersion]",
             "metadata": {
                 "description": "The version of the function app being deployed."
             }
