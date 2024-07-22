@@ -8,7 +8,7 @@ azure-functions==1.18.0
 applicationinsights
 
 # Azure Blob Storage SDK for backup container functionality
-azure-storage-blob==12.19.0
+azure-storage-blob==12.21.0
 
 # Utilities and helpers
 python-dotenv==1.0.1
