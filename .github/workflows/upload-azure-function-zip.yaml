@@ -38,7 +38,7 @@ jobs:
           func pack --build-native-deps --python
 
       - name: Upload 'logzio_function' zip file to Azure storage
-        uses: azure/CLI@v1
+        uses: azure/CLI@v2
         with:
           inlineScript: |
             az storage blob upload --account-name logzioblobtrigger --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} -f logzio_function/logzio_function.zip -c eventhub -n logzio_function-${{ github.event.release.tag_name }}.zip
