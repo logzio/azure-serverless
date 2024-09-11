@@ -37,6 +37,9 @@ jobs:
           cd logzio_function
           func pack --build-native-deps --python
           cp logzio_function.zip ../logzio_function.zip
+      
+      - name: Set file permissions
+        run: chmod 644 logzio_function.zip
 
       - name: List directory contents
         run: ls -la
