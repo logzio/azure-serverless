@@ -41,4 +41,4 @@ jobs:
         uses: azure/CLI@v2
         with:
           inlineScript: |
-            az storage blob upload --account-name logzioblobtrigger --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} -f logzio_function/logzio_function.zip -c eventhub -n logzio_function-${{ github.event.release.tag_name }}.zip
+            az storage blob upload --account-name logzioblobtrigger --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} --file logzio_function/logzio_function.zip --container-name eventhub --name logzio_function-${{ github.event.release.tag_name }}.zip
