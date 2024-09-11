@@ -39,18 +39,16 @@ jobs:
           cp logzio_function.zip ../logzio_function.zip
 
       - name: Set file permissions
-        run: chmod 644 logzio_function.zip
+        run: chmod 755 logzio_function.zip
 
       - name: List directory contents
         run: ls -la
 
       - name: Upload 'logzio_function' zip file to Azure storage
-        uses: azure/CLI@v2
-        with:
-          inlineScript: |
-            az storage blob upload \
-              --account-name logzioblobtrigger \
-              --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} \
-              --container-name eventhub \
-              --name logzio_function-${{ github.event.release.tag_name }}.zip \
-              --file $(pwd)/logzio_function.zip
+        run: |
+          az storage blob upload \
+            --account-name logzioblobtrigger \
+            --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} \
+            --container-name eventhub \
+            --name logzio_function-${{ github.event.release.tag_name }}.zip \
+            --file $(pwd)/logzio_function.zip
