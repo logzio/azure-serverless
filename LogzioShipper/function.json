@@ -3,7 +3,7 @@
   "bindings": [
     {
       "type": "eventHubTrigger",
-      "name": "azeventhub",
+      "name": "events",
       "direction": "in",
       "eventHubName": "%EventhubLogsName%",
       "connection": "AzureWebJobsEventHubConnectionString",

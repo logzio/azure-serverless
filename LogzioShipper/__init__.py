@@ -1,13 +1,10 @@
 import os
-import sys
-
 import azure.functions as func
 import logging
 import json
 import requests
 from requests import Session
-from dotenv import load_dotenv
-from LogzioShipper.backup_container import BackupContainer
+from .backup_container import BackupContainer
 from azure.storage.blob import ContainerClient
 from threading import Thread
 from queue import Queue, Empty
@@ -18,9 +15,6 @@ from applicationinsights import TelemetryClient
 
 # Initialize Application Insights
 tc = TelemetryClient(os.getenv("APPINSIGHTS_INSTRUMENTATIONKEY"))
-
-# Load environment variables from a .env file for local development
-load_dotenv()
 
 # Initialize Azure Blob Storage container client
 container_client = ContainerClient.from_connection_string(
@@ -154,8 +148,8 @@ def process_eventhub_message(event):
         return []
 
 
-def main(azeventhub: List[func.EventHubEvent]):
-    batch_creator_thread = Thread(target=batch_creator, args=(azeventhub,), daemon=True)
+def main(events: List[func.EventHubEvent]):
+    batch_creator_thread = Thread(target=batch_creator, args=(events,), daemon=True)
     batch_creator_thread.start()
     start_batch_senders(thread_count=ENV_THREAD_COUNT)
     batch_creator_thread.join()
