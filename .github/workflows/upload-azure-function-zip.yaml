@@ -49,5 +49,5 @@ jobs:
           az storage blob upload \
             --file logzio_function.zip \
             --container-name eventhub \
-            --name "$(pwd)/logzio_function-${{ github.event.release.tag_name }}.zip" \
+            --name "logzio_function-${{ github.event.release.tag_name }}.zip" \
             --connection-string "${{ secrets.STORAGE_ACCOUNT_KEY }}"
