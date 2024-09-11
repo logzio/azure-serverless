@@ -37,7 +37,7 @@ jobs:
           cd logzio_function
           func pack --build-native-deps --python
           cp logzio_function.zip ../logzio_function.zip
-      
+
       - name: Set file permissions
         run: chmod 644 logzio_function.zip
 
@@ -45,10 +45,12 @@ jobs:
         run: ls -la
 
       - name: Upload 'logzio_function' zip file to Azure storage
-        run: |
-          az storage blob upload \
-            --account-name logzioblobtrigger \
-            --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} \
-            --container-name eventhub \
-            --name logzio_function-${{ github.event.release.tag_name }}.zip \
-            --file logzio_function.zip
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            az storage blob upload \
+              --account-name logzioblobtrigger \
+              --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} \
+              --container-name eventhub \
+              --name logzio_function-${{ github.event.release.tag_name }}.zip \
+              --file $(pwd)/logzio_function.zip
