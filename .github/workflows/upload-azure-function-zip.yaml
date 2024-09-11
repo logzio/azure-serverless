@@ -36,7 +36,7 @@ jobs:
           cp -r LogzioShipper logzio_function/
           cd logzio_function
           func pack --build-native-deps --python
-          cp logzio_function.zip ../
+          cp logzio_function.zip ../logzio_function.zip
 
       - name: Upload 'logzio_function' zip file to Azure storage
         uses: azure/CLI@v2
