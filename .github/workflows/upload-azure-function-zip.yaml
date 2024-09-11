@@ -47,8 +47,7 @@ jobs:
       - name: Upload 'logzio_function' zip file to Azure storage
         run: |
           az storage blob upload \
-            --account-name logzioblobtrigger \
-            --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} \
+            --file logzio_function.zip \
             --container-name eventhub \
-            --name logzio_function-${{ github.event.release.tag_name }}.zip \
-            --file $(pwd)/logzio_function.zip
+            --name "$(pwd)/logzio_function-${{ github.event.release.tag_name }}.zip" \
+            --connection-string "${{ secrets.STORAGE_ACCOUNT_KEY }}"
