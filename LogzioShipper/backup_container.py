@@ -2,7 +2,6 @@ import os
 import json
 import tempfile
 from datetime import datetime
-from azure.storage.blob import BlobClient, ContainerClient
 from azure.core.exceptions import ResourceExistsError
 
 
