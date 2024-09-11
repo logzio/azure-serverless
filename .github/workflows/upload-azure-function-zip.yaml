@@ -50,4 +50,5 @@ jobs:
             --file logzio_function.zip \
             --container-name eventhub \
             --name "logzio_function-${{ github.event.release.tag_name }}.zip" \
-            --connection-string "${{ secrets.STORAGE_ACCOUNT_KEY }}"
+            --connection-string "${{ secrets.STORAGE_ACCOUNT_KEY }}" \
+            -overwrite true
