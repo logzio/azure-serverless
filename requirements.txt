@@ -8,7 +8,7 @@ azure-functions==1.18.0
 applicationinsights==0.11.10
 
 # Azure Blob Storage SDK for backup container functionality
-azure-storage-blob==12.19.0
+azure-storage-blob==12.23.0
 
 # Utilities and helpers
 backoff==2.2.1
