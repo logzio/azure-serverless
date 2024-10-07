@@ -3,7 +3,7 @@
 # Manually managing azure-functions-worker may cause unexpected issues
 
 # Azure Functions framework
-azure-functions==1.18.0
+azure-functions==1.21.1
 
 applicationinsights==0.11.10
 
