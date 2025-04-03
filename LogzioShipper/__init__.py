@@ -14,7 +14,8 @@ import time
 from applicationinsights import TelemetryClient
 
 # Initialize Application Insights
-tc = TelemetryClient(os.getenv("APPINSIGHTS_INSTRUMENTATIONKEY"))
+appinsights_key = os.getenv("APPINSIGHTS_INSTRUMENTATIONKEY")
+tc = TelemetryClient(appinsights_key) if appinsights_key else None
 
 # Initialize Azure Blob Storage container client
 container_client = ContainerClient.from_connection_string(
@@ -74,8 +75,9 @@ def send_batch(batch_data):
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to send batch: {e}")
         backup_container.write_event_to_blob(batch_data, e)
-        tc.track_metric('FailedLogSendCount', len(batch_data))
-        tc.flush()
+        if tc:  # Only track metric if Application Insights is configured
+            tc.track_metric('FailedLogSendCount', len(batch_data))
+            tc.flush()
         raise e
 
 
