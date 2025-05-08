@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
-# test_logzio_shipper.py - Test file for running the Logzio Shipper with custom input
+# test_logzio_shipper.py - Simple test file for running the Logzio Shipper with custom input
 
 import os
 import sys
 import json
 import time
 import logging
-from threading import Thread
 import azure.functions as func
 from dotenv import load_dotenv
-from azure.storage.blob import ContainerClient
 
-# Import the main function from __init__.py
-from LogzioShipper import main, batch_queue
+# Direct import from local __init__.py file rather than as a module
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from LogzioShipper.__init__ import main, batch_queue, get_message, process_error_messages
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
@@ -46,31 +45,29 @@ def setup_environment():
         "LOG_TYPE": os.getenv("LOG_TYPE", "eventHub"),
         "FUNCTION_VERSION": os.getenv("FUNCTION_VERSION", "1.0.0"),
         "THREAD_COUNT": os.getenv("THREAD_COUNT", "4"),
-        "BUFFER_SIZE": os.getenv("BUFFER_SIZE", "100"),
-        "INTERVAL_TIME": os.getenv("INTERVAL_TIME", "10000")  # milliseconds
+        "BUFFER_SIZE": os.getenv("BUFFER_SIZE", "10"),
+        "INTERVAL_TIME": os.getenv("INTERVAL_TIME", "5000")  # milliseconds
     }
     
     # Set environment variables if not already set
     for key, value in env_vars.items():
-        if not os.getenv(key):
-            os.environ[key] = value
-            logger.info(f"Set environment variable {key}={value}")
-
-
-def generate_test_events(sample_logs_file=None, sample_count=1):
-    """
-    Generate test EventHubEvent objects
+        os.environ[key] = value
     
-    Args:
-        sample_logs_file: Path to a JSON file with sample logs
-        sample_count: Number of sample events to generate if no file is provided
+    logger.info("Environment variables set successfully")
+
+
+def load_sample_logs():
+    """
+    Load sample logs from the static sample_logs.json file
     
     Returns:
         List of MockEventHubEvent objects
     """
     events = []
+    # Use static file path
+    sample_logs_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sample_logs.json')
     
-    if sample_logs_file and os.path.exists(sample_logs_file):
+    if os.path.exists(sample_logs_file):
         # Load logs from file
         with open(sample_logs_file, 'r') as f:
             try:
@@ -96,29 +93,27 @@ def generate_test_events(sample_logs_file=None, sample_count=1):
                     events.append(MockEventHubEvent('\n'.join(log_lines)))
                     logger.info(f"Loaded {len(log_lines)} log lines as a single event")
     else:
-        # Generate sample events
-        for i in range(sample_count):
-            # Create a sample log with some common fields
-            sample_log = {
-                "time": f"2025-05-08T10:{i:02d}:00.000Z",
-                "resourceId": f"/subscriptions/sub123/resourceGroups/test-rg/providers/Microsoft.Test/resource{i}",
-                "category": "TestLogs",
-                "operationName": f"TestOperation{i}",
-                "level": "Information",
-                "properties": {
-                    "message": f"This is test message {i}",
-                    "test_id": i
-                },
-                "function_version": "test"
-            }
-            events.append(MockEventHubEvent(json.dumps(sample_log)))
-        
-        logger.info(f"Generated {sample_count} sample events")
+        logger.warning(f"Sample logs file {sample_logs_file} not found")
+        # Generate one sample event if file not found
+        sample_log = {
+            "time": "2025-05-08T10:00:00.000Z",
+            "resourceId": "/subscriptions/sub123/resourceGroups/test-rg/providers/Microsoft.Test/resource1",
+            "category": "TestLogs",
+            "operationName": "TestOperation1",
+            "level": "Information",
+            "properties": {
+                "message": "This is a test message",
+                "test_id": 1
+            },
+            "function_version": "test"
+        }
+        events.append(MockEventHubEvent(json.dumps(sample_log)))
+        logger.info("Generated a sample event as fallback")
     
     return events
 
 
-def wait_for_processing(timeout=30):
+def wait_for_processing(timeout=10):
     """Wait for the batch queue to be empty or until timeout"""
     start_time = time.time()
     while not batch_queue.empty():
@@ -133,16 +128,8 @@ if __name__ == "__main__":
     # Set up environment
     setup_environment()
     
-    # Parse command line arguments
-    import argparse
-    parser = argparse.ArgumentParser(description='Test LogzioShipper with custom input')
-    parser.add_argument('--file', type=str, help='Path to JSON file with sample logs')
-    parser.add_argument('--count', type=int, default=5, help='Number of sample events to generate if no file is provided')
-    parser.add_argument('--timeout', type=int, default=30, help='Timeout in seconds to wait for processing')
-    args = parser.parse_args()
-    
-    # Generate test events
-    events = generate_test_events(args.file, args.count)
+    # Load sample logs from static file
+    events = load_sample_logs()
     
     if not events:
         logger.error("No events to process. Exiting.")
@@ -158,7 +145,7 @@ if __name__ == "__main__":
         main(func_events)
         
         # Wait for processing to complete
-        wait_for_processing(args.timeout)
+        wait_for_processing(10)
         
         logger.info("Test completed successfully")
     except Exception as e:
