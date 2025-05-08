@@ -131,15 +131,18 @@ def process_eventhub_message(event):
         for line in message_body.splitlines():
             log_entry = json.loads(line)
             
-            # Append version number to log
             log_entry['function_version'] = ENV_FUNCTION_VERSION
+
+            log_entry = add_timestamp(log_entry)
+            log_entry = delete_empty_fields_of_log(log_entry)
 
             # Check if this log entry contains nested logs under 'records'
             if 'records' in log_entry and isinstance(log_entry['records'], list):
                 for record in log_entry['records']:
-                    # Ensure nested logs also include the version number
                     record['function_version'] = ENV_FUNCTION_VERSION
-                logs.extend(log_entry['records'])  # Add nested logs individually
+                    record = add_timestamp(record)
+                    record = delete_empty_fields_of_log(record)
+                logs.extend(log_entry['records'])  
             else:
                 logs.append(log_entry)
         return logs
