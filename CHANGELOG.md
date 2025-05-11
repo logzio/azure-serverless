@@ -5,7 +5,7 @@ All notable changes to the Logz.io Azure Serverless project will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.0] - 2025-05-08
+## [0.0.3]
 
 ### Added
 - Implemented usage of previously defined utility functions:
@@ -15,7 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Addressed issue where unused utility functions were defined but not utilized
 
-## [1.0.0] - Initial Release
+## [0.0.2] - Initial Release
+
+### Added
+- This new release introduces the ENV_FUNCTION_VERSION parameter into the ARM template and Terraform to allow dynamic configuration of the function app version.
+
+
+## [0.0.1] - Initial Release
 
 ### Added
 - Initial implementation of Logz.io Shipper for Azure Functions
