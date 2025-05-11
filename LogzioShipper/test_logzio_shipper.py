@@ -138,13 +138,12 @@ def fetch_and_assert(run_id, api_key, timeout=120, interval=5):
     raise AssertionError(f"No logs found for test_run_id={run_id} after {timeout}s")
 
 def main_test():
-    if args.verbose:
-        logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
 
     run_id = uuid.uuid4().hex
     logger.info(f"Starting E2E test with run_id={run_id}")
 
-    events = load_sample_logs(run_id, args.file)
+    events = load_sample_logs(run_id, "sample_logs.json")
     if not events:
         logger.error("No events to process; exiting")
         sys.exit(1)
