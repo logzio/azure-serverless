@@ -8,7 +8,7 @@ jobs:
   upload-azure-function-zip:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required for uploading release assets
+      contents: write 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,7 +21,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '18'
 
       - name: Install Azure Functions Core Tools
         run: npm i -g azure-functions-core-tools@4 --unsafe-perm true
@@ -39,6 +39,13 @@ jobs:
           cd logzio_function
           func pack --build-native-deps --python
 
+      - name: Upload zip as release asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: logzio_function/logzio_function.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ github.event.release.tag_name }}
+          
       - name: Upload blob to Azure Storage
         uses: azure/CLI@v1
         with:
@@ -50,10 +57,3 @@ jobs:
               --file logzio_function/logzio_function.zip \
               --container-name eventhub \
               --name logzio_function-test.zip
-
-      - name: Upload zip as release asset
-        uses: softprops/action-gh-release@v1
-        with:
-          files: logzio_function/logzio_function.zip
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: ${{ github.event.release.tag_name }}
