@@ -47,18 +47,14 @@ jobs:
 
       - name: Upload function ZIP to Azure Blob
         uses: azure/cli@v2
+        env:
+          AZURE_STORAGE_ACCOUNT: logzioblobtrigger
+          AZURE_STORAGE_KEY: ${{ secrets.STORAGE_ACCOUNT_KEY }}
         with:
           azcliversion: latest
           inlineScript: |
             cd logzio_function
-            ls
-            az storage blob upload -f logzio_function.zip \
-              --account-name logzioblobtrigger \
-              --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} \
-              --auth-mode key \
-              --container-name eventhub \
-              --name logzio_function-${{ github.event.release.tag_name }}.zip \
-              --overwrite
+            az storage blob upload -f logzio_function.zip -c eventhub -n logzio_function-${{ github.event.release.tag_name }}.zip --auth-mode key --overwrite
         
 
             
