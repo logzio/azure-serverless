@@ -13,43 +13,36 @@ from typing import List
 import time
 from applicationinsights import TelemetryClient
 
-# Initialize Application Insights
-tc = TelemetryClient(os.getenv("APPINSIGHTS_INSTRUMENTATIONKEY"))
-
-# Initialize Azure Blob Storage container client
-container_client = ContainerClient.from_connection_string(
-    conn_str=os.getenv("AzureWebJobsStorage"),
-    container_name=os.getenv("AZURE_STORAGE_CONTAINER_NAME")
-)
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 
 # Logz.io configuration
 ENV_LOGZIO_URL = os.getenv("LogzioURL")
 ENV_LOGZIO_TOKEN = os.getenv("LogzioToken")
+AzureWebJobsStorage = os.getenv("AzureWebJobsStorage")
+AZURE_STORAGE_CONTAINER_NAME = os.getenv("AZURE_STORAGE_CONTAINER_NAME")
+APPINSIGHTS_INSTRUMENTATIONKEY = os.getenv("APPINSIGHTS_INSTRUMENTATIONKEY")
 HEADERS = {"Content-Type": "application/json"}
-RETRY_WAIT_FIXED = 2  # seconds for retry delay
+RETRY_WAIT_FIXED = 2  
 ENV_MAX_TRIES = int(os.getenv('MAX_TRIES', 3))
 ENV_LOG_TYPE = os.getenv('LOG_TYPE', "eventHub")
 ENV_FUNCTION_VERSION = os.getenv('FUNCTION_VERSION', '1.0.0')
 
-# Thread and Queue Configuration
 ENV_THREAD_COUNT = int(os.getenv('THREAD_COUNT', 4))
-batch_queue = Queue()
 
-# Backup Container
-backup_container = BackupContainer(logging, container_client)
 
-# Connection Pool (Session)
-session = Session()
-
-# Constants for batching logs
 ENV_BUFFER_SIZE = int(os.getenv('BUFFER_SIZE', 100))  # Batch size
 ENV_INTERVAL_TIME = int(os.getenv('INTERVAL_TIME', 10000)) / 1000  # Interval time in seconds
 
-
+tc = TelemetryClient(APPINSIGHTS_INSTRUMENTATIONKEY)
+batch_queue = Queue()
+container_client = ContainerClient.from_connection_string(
+      conn_str=AzureWebJobsStorage,
+      container_name=AZURE_STORAGE_CONTAINER_NAME
+  )
+backup_container = BackupContainer(logging, container_client)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+session = Session()
+    
 def add_timestamp(log):
     if 'time' in log:
         log['@timestamp'] = log['time']
