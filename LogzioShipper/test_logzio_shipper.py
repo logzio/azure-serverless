@@ -1,53 +1,24 @@
-#!/usr/bin/env python3
-# test_logzio_shipper.py - Full E2E test file without persisting run_id in ENV
-
 import os
 import sys
 import json
 import time
 import uuid
-import logging
-import argparse
 import datetime
+import logging
+import pytest
 import requests
-from dotenv import load_dotenv
-
 import azure.functions as func
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from LogzioShipper.__init__ import main
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
-def setup_environment():
-    """Set up necessary environment variables for testing the LogzioShipper"""
-    load_dotenv()
-    env_vars = {
-        "AzureWebJobsStorage": os.getenv("AzureWebJobsStorage", "storage"),
-        "AZURE_STORAGE_CONTAINER_NAME": os.getenv("AZURE_STORAGE_CONTAINER_NAME", "failedlogbackup"),
-        "LogzioURL": os.getenv("LogzioURL", "https://listener.logz.io:8071"),
-        "LogzioToken": os.getenv("LogzioToken", "token"),
-        "APPINSIGHTS_INSTRUMENTATIONKEY": os.getenv("APPINSIGHTS_INSTRUMENTATIONKEY", "key"),
-        "MAX_TRIES": os.getenv("MAX_TRIES", "3"),
-        "LOG_TYPE": os.getenv("LOG_TYPE", "eventHub"),
-        "FUNCTION_VERSION": os.getenv("FUNCTION_VERSION", "1.0.0"),
-        "THREAD_COUNT": os.getenv("THREAD_COUNT", "4"),
-        "BUFFER_SIZE": os.getenv("BUFFER_SIZE", "10"),
-        "INTERVAL_TIME": os.getenv("INTERVAL_TIME", "5000"),
-    }
-    for key, value in env_vars.items():
-        os.environ[key] = value
-    logger.info("Environment variables set successfully")
-
-
-class MockEventHubEvent:
-    def __init__(self, body):
-        self.body = body.encode('utf-8') if isinstance(body, str) else body
-    def get_body(self):
-        return self.body
 
 def get_current_time_iso():
     return datetime.datetime.now().astimezone().isoformat()
+
 
 def update_log_time(log):
     if isinstance(log, dict):
@@ -61,6 +32,7 @@ def update_log_time(log):
             update_log_time(item)
     return log
 
+
 def inject_test_run_id(log, run_id):
     if isinstance(log, dict):
         log['test_run_id'] = run_id
@@ -71,6 +43,15 @@ def inject_test_run_id(log, run_id):
         for item in log:
             inject_test_run_id(item, run_id)
     return log
+
+
+class MockEventHubEvent:
+    def __init__(self, body):
+        self.body = body.encode('utf-8') if isinstance(body, str) else body
+
+    def get_body(self):
+        return self.body
+
 
 def load_sample_logs(run_id, file_path=None):
     events = []
@@ -111,6 +92,7 @@ def load_sample_logs(run_id, file_path=None):
 
     return events
 
+
 def fetch_and_assert(run_id, api_key, timeout=120, interval=5):
     url = "https://api.logz.io/v1/search"
     payload = {
@@ -130,35 +112,56 @@ def fetch_and_assert(run_id, api_key, timeout=120, interval=5):
         if hits > 0:
             logger.info(f"✅ Found {hits} log(s) for run_id={run_id}")
             return
-        logger.debug(f"Waiting for logs for run_id={run_id}…")
         time.sleep(interval)
 
-    raise AssertionError(f"No logs found for test_run_id={run_id} after {timeout}s")
+    pytest.fail(f"No logs found for test_run_id={run_id} after {timeout}s")
 
-def main_test():
-    logger.setLevel(logging.DEBUG)
-    setup_environment()
 
-    run_id = uuid.uuid4().hex
-    logger.info(f"Starting E2E test with run_id={run_id}")
+def env_setup():
+    """
+    Automatically set environment variables for all tests.
+    """
+    env_vars = {
+        "AzureWebJobsStorage": os.getenv("AzureWebJobsStorage", "storage"),
+        "AZURE_STORAGE_CONTAINER_NAME": os.getenv("AZURE_STORAGE_CONTAINER_NAME", "failedlogbackup"),
+        "LogzioURL": os.getenv("LogzioURL", "https://listener.logz.io:8071"),
+        "LogzioToken": os.getenv("LogzioToken", "token"),
+        "LogzioApiToken": os.getenv("LogzioApiToken", "token"),
+        "APPINSIGHTS_INSTRUMENTATIONKEY": os.getenv("APPINSIGHTS_INSTRUMENTATIONKEY", "key"),
+        "MAX_TRIES": os.getenv("MAX_TRIES", "3"),
+        "LOG_TYPE": os.getenv("LOG_TYPE", "eventHub"),
+        "FUNCTION_VERSION": os.getenv("FUNCTION_VERSION", "1.0.0"),
+        "THREAD_COUNT": os.getenv("THREAD_COUNT", "4"),
+        "BUFFER_SIZE": os.getenv("BUFFER_SIZE", "10"),
+        "INTERVAL_TIME": os.getenv("INTERVAL_TIME", "5000"),
+    }
+    for key, value in env_vars.items():
+        os.environ[key] = value
 
-    events = load_sample_logs(run_id, "sample_logs.json")
-    if not events:
-        logger.error("No events to process; exiting")
-        sys.exit(1)
+@pytest.fixture
+def run_id():
+    """
+    Generate a unique test run ID.
+    """
+    return uuid.uuid4().hex
 
-    try:
-        func_events = [func.EventHubEvent(body=e.get_body()) for e in events]
-        main(func_events)
+@pytest.fixture
+def func_events(run_id):
+    """
+    Prepare a list of Azure Function EventHubEvent objects with sample logs.
+    """
+    events = load_sample_logs(run_id)
+    assert events, "No events loaded"
+    return [func.EventHubEvent(body=e.get_body()) for e in events]
 
-        time.sleep(120)
-        fetch_and_assert(run_id, os.environ["LogzioApiToken"])
+# --- Test Cases ---
 
-        logger.info("✅ E2E test completed successfully")
-    except Exception as e:
-        logger.error("❌ Test failed", exc_info=True)
-        sys.exit(1)
+def test_logzio_shipper_end_to_end(run_id, func_events):
+    """
+    End-to-end test: send sample events to the Azure Function and verify logs in Logz.io.
+    """
+    env_setup()
 
-if __name__ == "__main__":
-    main_test()
+    main(func_events)
 
+    fetch_and_assert(run_id, os.environ["LogzioApiToken"], timeout=120, interval=5)
