@@ -11,15 +11,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
       - name: Azure Login
-        uses: azure/actions/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '18'
 
       - name: Install Azure Functions Core Tools
         run: npm i -g azure-functions-core-tools@4 --unsafe-perm true
@@ -27,7 +31,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Create zip file with specific files
         run: |
@@ -37,8 +41,21 @@ jobs:
           cd logzio_function
           func pack --build-native-deps --python
 
-      - name: Upload 'logzio_function' zip file to Azure storage
-        uses: azure/CLI@v2
+      - name: Upload zip as release asset
+        uses: softprops/action-gh-release@v2
         with:
-          inlineScript: |
-            az storage blob upload --account-name logzioblobtrigger --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} --file logzio_function/logzio_function.zip --container-name eventhub --name logzio_function-${{ github.event.release.tag_name }}.zip
+          files: logzio_function/logzio_function.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ github.event.release.tag_name }}
+
+      - name: Upload function ZIP to Azure Blob
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+        run: |
+          cd logzio_function
+          az storage blob upload \
+            --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+            --container-name eventhub \
+            --name logzio_function-${{ github.event.release.tag_name }}.zip \
+            --file logzio_function.zip \
+            --overwrite

@@ -1,0 +1,66 @@
+[
+  {
+    "time": "2025-05-08T09:00:00.000Z",
+    "resourceId": "/subscriptions/sub123/resourceGroups/test-rg/providers/Microsoft.Storage/storageAccounts/teststorage",
+    "category": "StorageLogs",
+    "operationName": "StorageRead",
+    "level": "Information",
+    "properties": {
+      "message": "Storage read operation successful",
+      "statusCode": 200,
+      "requestId": "req-123456"
+    }
+  },
+  {
+    "time": "2025-05-08T09:15:00.000Z",
+    "resourceId": "/subscriptions/sub123/resourceGroups/test-rg/providers/Microsoft.Storage/storageAccounts/teststorage",
+    "category": "StorageLogs",
+    "operationName": "StorageWrite",
+    "level": "Information",
+    "properties": {
+      "message": "Storage write operation successful",
+      "statusCode": 201,
+      "requestId": "req-789012"
+    }
+  },
+  {
+    "records": [
+      {
+        "time": "2025-05-08T10:30:00.000Z",
+        "resourceId": "/subscriptions/sub123/resourceGroups/test-rg/providers/Microsoft.Compute/virtualMachines/testvm",
+        "category": "VMLogs",
+        "operationName": "VMStart",
+        "level": "Information",
+        "properties": {
+          "message": "Virtual machine started successfully",
+          "vmId": "vm-12345"
+        }
+      },
+      {
+        "time": "2025-05-08T10:35:00.000Z",
+        "resourceId": "/subscriptions/sub123/resourceGroups/test-rg/providers/Microsoft.Compute/virtualMachines/testvm",
+        "category": "VMLogs",
+        "operationName": "VMOperation",
+        "level": "Warning",
+        "properties": {
+          "message": "High CPU utilization detected",
+          "cpuPercentage": 92,
+          "vmId": "vm-12345"
+        }
+      }
+    ]
+  },
+  {
+    "time": "2025-05-08T11:00:00.000Z",
+    "resourceId": "/subscriptions/sub123/resourceGroups/test-rg/providers/Microsoft.Network/networkInterfaces/testnic",
+    "category": "NetworkLogs",
+    "operationName": "NetworkTraffic",
+    "level": "Error",
+    "properties": {
+      "message": "Network connection timeout",
+      "sourceIP": "10.0.0.1",
+      "destinationIP": "10.0.0.2",
+      "errorCode": "TIMEOUT"
+    }
+  }
+]

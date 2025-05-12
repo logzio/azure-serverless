@@ -1,0 +1,43 @@
+name: E2E Tests
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  e2e-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest
+        
+    - name: Run E2E tests
+      env:
+        AzureWebJobsStorage: ${{ secrets.AZUREWEBJOBSSTORAGE }}
+        AZURE_STORAGE_CONTAINER_NAME: failedlogbackup
+        LogzioURL: https://listener.logz.io:8071
+        LogzioToken: ${{ secrets.LOGZIO_LOGS_TOKEN }}
+        LogzioApiToken: ${{ secrets.LOGZIO_API_TOKEN }}
+        APPINSIGHTS_INSTRUMENTATIONKEY: ${{ secrets.APPINSIGHTS_INSTRUMENTATIONKEY }}
+      run: |
+        pytest -v LogzioShipper/test_logzio_shipper.py --log-cli-level=INFO
+        
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-logs
+        path: |
+          ./**/*.log

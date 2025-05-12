@@ -13,43 +13,37 @@ from typing import List
 import time
 from applicationinsights import TelemetryClient
 
-# Initialize Application Insights
-tc = TelemetryClient(os.getenv("APPINSIGHTS_INSTRUMENTATIONKEY"))
-
-# Initialize Azure Blob Storage container client
-container_client = ContainerClient.from_connection_string(
-    conn_str=os.getenv("AzureWebJobsStorage"),
-    container_name=os.getenv("AZURE_STORAGE_CONTAINER_NAME")
-)
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 
 # Logz.io configuration
 ENV_LOGZIO_URL = os.getenv("LogzioURL")
 ENV_LOGZIO_TOKEN = os.getenv("LogzioToken")
+AZURE_WEB_JOBS_STORAGE = os.getenv("AzureWebJobsStorage")
+AZURE_STORAGE_CONTAINER_NAME = os.getenv("AZURE_STORAGE_CONTAINER_NAME")
+APPINSIGHTS_INSTRUMENTATIONKEY = os.getenv("APPINSIGHTS_INSTRUMENTATIONKEY")
 HEADERS = {"Content-Type": "application/json"}
-RETRY_WAIT_FIXED = 2  # seconds for retry delay
+RETRY_WAIT_FIXED = 2  
 ENV_MAX_TRIES = int(os.getenv('MAX_TRIES', 3))
 ENV_LOG_TYPE = os.getenv('LOG_TYPE', "eventHub")
 ENV_FUNCTION_VERSION = os.getenv('FUNCTION_VERSION', '1.0.0')
 
-# Thread and Queue Configuration
 ENV_THREAD_COUNT = int(os.getenv('THREAD_COUNT', 4))
-batch_queue = Queue()
 
-# Backup Container
-backup_container = BackupContainer(logging, container_client)
 
-# Connection Pool (Session)
-session = Session()
-
-# Constants for batching logs
 ENV_BUFFER_SIZE = int(os.getenv('BUFFER_SIZE', 100))  # Batch size
 ENV_INTERVAL_TIME = int(os.getenv('INTERVAL_TIME', 10000)) / 1000  # Interval time in seconds
 
-
+appinsights_key = os.getenv("APPINSIGHTS_INSTRUMENTATIONKEY")
+tc = TelemetryClient(appinsights_key) if appinsights_key else None
+batch_queue = Queue()
+container_client = ContainerClient.from_connection_string(
+      conn_str=AZURE_WEB_JOBS_STORAGE,
+      container_name=AZURE_STORAGE_CONTAINER_NAME
+  )
+backup_container = BackupContainer(logging, container_client)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+session = Session()
+    
 def add_timestamp(log):
     if 'time' in log:
         log['@timestamp'] = log['time']
@@ -74,8 +68,9 @@ def send_batch(batch_data):
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to send batch: {e}")
         backup_container.write_event_to_blob(batch_data, e)
-        tc.track_metric('FailedLogSendCount', len(batch_data))
-        tc.flush()
+        if tc:
+          tc.track_metric('FailedLogSendCount', len(batch_data))
+          tc.flush()
         raise e
 
 
@@ -131,15 +126,18 @@ def process_eventhub_message(event):
         for line in message_body.splitlines():
             log_entry = json.loads(line)
             
-            # Append version number to log
             log_entry['function_version'] = ENV_FUNCTION_VERSION
+
+            log_entry = add_timestamp(log_entry)
+            log_entry = delete_empty_fields_of_log(log_entry)
 
             # Check if this log entry contains nested logs under 'records'
             if 'records' in log_entry and isinstance(log_entry['records'], list):
                 for record in log_entry['records']:
-                    # Ensure nested logs also include the version number
                     record['function_version'] = ENV_FUNCTION_VERSION
-                logs.extend(log_entry['records'])  # Add nested logs individually
+                    record = add_timestamp(record)
+                    record = delete_empty_fields_of_log(record)
+                logs.extend(log_entry['records'])  
             else:
                 logs.append(log_entry)
         return logs
