@@ -36,6 +36,7 @@ jobs:
           cp -r LogzioShipper logzio_function/
           cd logzio_function
           func pack --build-native-deps --python
+          cd ..
       
       - name: Upload zip as release asset
         uses: softprops/action-gh-release@v2
@@ -47,6 +48,7 @@ jobs:
       - name: Upload 'logzio_function' zip file to Azure storage
         uses: azure/cli@v2
         with:
+          azcliversion: latest
           inlineScript: |
             az storage blob upload \
             --account-name logzioblobtrigger \
