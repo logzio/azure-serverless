@@ -49,6 +49,13 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
 
       - name: Upload function ZIP to Azure Blob
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
         run: |
           cd logzio_function
-          az storage blob upload --auth-mode key -f logzio_function.zip --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} --account-name logzioblobtrigger -c eventhub -n logzio_function-${{ github.event.release.tag_name }}.zip --overwrite
+          az storage blob upload \
+            --connection-string "$AZURE_STORAGE_CONNECTION_STRING" \
+            --container-name eventhub \
+            --name logzio_function-${{ github.event.release.tag_name }}.zip \
+            --file logzio_function.zip \
+            --overwrite
