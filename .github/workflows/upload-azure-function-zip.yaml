@@ -40,7 +40,6 @@ jobs:
           cp -r LogzioShipper logzio_function/
           cd logzio_function
           func pack --build-native-deps --python
-          cd ..
 
       - name: Upload zip as release asset
         uses: softprops/action-gh-release@v2
@@ -52,11 +51,4 @@ jobs:
       - name: Upload function ZIP to Azure Blob
         run: |
           cd logzio_function
-          az storage blob upload \
-            --file logzio_function.zip \
-            --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} \
-            --account-name logzioblobtrigger \
-            --container-name eventhub \
-            --name logzio_function-${{ github.event.release.tag_name }}.zip \
-            --auth-mode key \
-            --overwrite
+          az storage blob upload -f logzio_function.zip --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} --account-name logzioblobtrigger -c eventhub -n logzio_function-${{ github.event.release.tag_name }}.zip --overwrite
