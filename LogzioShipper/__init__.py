@@ -18,7 +18,7 @@ from applicationinsights import TelemetryClient
 # Logz.io configuration
 ENV_LOGZIO_URL = os.getenv("LogzioURL")
 ENV_LOGZIO_TOKEN = os.getenv("LogzioToken")
-AzureWebJobsStorage = os.getenv("AzureWebJobsStorage")
+AZURE_WEB_JOBS_STORAGE = os.getenv("AzureWebJobsStorage")
 AZURE_STORAGE_CONTAINER_NAME = os.getenv("AZURE_STORAGE_CONTAINER_NAME")
 APPINSIGHTS_INSTRUMENTATIONKEY = os.getenv("APPINSIGHTS_INSTRUMENTATIONKEY")
 HEADERS = {"Content-Type": "application/json"}
@@ -37,7 +37,7 @@ appinsights_key = os.getenv("APPINSIGHTS_INSTRUMENTATIONKEY")
 tc = TelemetryClient(appinsights_key) if appinsights_key else None
 batch_queue = Queue()
 container_client = ContainerClient.from_connection_string(
-      conn_str=AzureWebJobsStorage,
+      conn_str=AZURE_WEB_JOBS_STORAGE,
       container_name=AZURE_STORAGE_CONTAINER_NAME
   )
 backup_container = BackupContainer(logging, container_client)
