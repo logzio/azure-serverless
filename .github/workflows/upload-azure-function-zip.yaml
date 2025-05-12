@@ -38,7 +38,7 @@ jobs:
           func pack --build-native-deps --python
       
       - name: Upload zip as release asset
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: logzio_function/logzio_function.zip
           token: ${{ secrets.GITHUB_TOKEN }}
