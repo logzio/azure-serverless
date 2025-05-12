@@ -26,8 +26,6 @@ jobs:
     - name: Run E2E tests
       env:
         AzureWebJobsStorage: ${{ secrets.AZUREWEBJOBSSTORAGE }}
-        AZURE_STORAGE_CONTAINER_NAME: failedlogbackup
-        LogzioURL: ${{ secrets.LOGZIO_URL }}
         LogzioToken: ${{ secrets.LOGZIO_LOGS_TOKEN }}
         LogzioApiToken: ${{ secrets.LOGZIO_API_TOKEN }}
         APPINSIGHTS_INSTRUMENTATIONKEY: ${{ secrets.APPINSIGHTS_INSTRUMENTATIONKEY }}
