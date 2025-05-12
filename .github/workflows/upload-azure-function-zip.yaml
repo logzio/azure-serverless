@@ -11,6 +11,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Azure CLI
+        run: |
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -37,7 +41,7 @@ jobs:
           cd logzio_function
           func pack --build-native-deps --python
           cd ..
-      
+
       - name: Upload zip as release asset
         uses: softprops/action-gh-release@v2
         with:
@@ -46,15 +50,14 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
 
       - name: Upload function ZIP to Azure Blob
-        uses: azure/cli@v2
         env:
           AZURE_STORAGE_ACCOUNT: logzioblobtrigger
           AZURE_STORAGE_KEY: ${{ secrets.STORAGE_ACCOUNT_KEY }}
-        with:
-          azcliversion: latest
-          inlineScript: |
-            cd logzio_function
-            az storage blob upload -f logzio_function.zip -c eventhub -n logzio_function-${{ github.event.release.tag_name }}.zip --auth-mode key --overwrite
-        
-
-            
+        run: |
+          cd logzio_function
+          az storage blob upload \
+            --file logzio_function.zip \
+            --container-name eventhub \
+            --name logzio_function-${{ github.event.release.tag_name }}.zip \
+            --auth-mode key \
+            --overwrite
