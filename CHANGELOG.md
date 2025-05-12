@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implemented usage of previously defined utility functions:
   - `add_timestamp`: Now adds `@timestamp` field to logs based on the `time` field
   - `delete_empty_fields_of_log`: Removes empty or null fields from logs
+  - Enable running without app insights and a log analytics workspace (contributed by @athiedepayit)
+
 
 ### Fixed
 - Addressed issue where unused utility functions were defined but not utilized
