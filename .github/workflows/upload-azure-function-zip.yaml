@@ -45,17 +45,20 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ github.event.release.tag_name }}
 
-      - name: Upload 'logzio_function' zip file to Azure storage
+      - name: Upload function ZIP to Azure Blob
         uses: azure/cli@v2
         with:
           azcliversion: latest
+          scriptType: bash
           inlineScript: |
             az storage blob upload \
-            --account-name logzioblobtrigger \
-            --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} \
-            --file logzio_function/logzio_function.zip \
-            --container-name eventhub \
-            --name logzio_function-${{ github.event.release.tag_name }}.zip \
-            --overwrite true
+              --account-name logzioblobtrigger \
+              --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} \
+              --auth-mode key \
+              --container-name eventhub \
+              --name logzio_function-${{ github.event.release.tag_name }}.zip \
+              --file logzio_function/logzio_function.zip \
+              --overwrite
+        
 
             
