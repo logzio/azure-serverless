@@ -49,15 +49,15 @@ jobs:
         uses: azure/cli@v2
         with:
           azcliversion: latest
-          scriptType: bash
           inlineScript: |
+            cd logzio_function
             az storage blob upload \
               --account-name logzioblobtrigger \
               --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} \
               --auth-mode key \
               --container-name eventhub \
               --name logzio_function-${{ github.event.release.tag_name }}.zip \
-              --file logzio_function/logzio_function.zip \
+              --file logzio_function.zip \
               --overwrite
         
 
