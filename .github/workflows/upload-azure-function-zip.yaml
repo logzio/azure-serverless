@@ -27,7 +27,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Create zip file with specific files
         run: |
@@ -51,13 +51,13 @@ jobs:
           azcliversion: latest
           inlineScript: |
             cd logzio_function
-            az storage blob upload \
+            ls
+            az storage blob upload -f logzio_function.zip \
               --account-name logzioblobtrigger \
               --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} \
               --auth-mode key \
               --container-name eventhub \
               --name logzio_function-${{ github.event.release.tag_name }}.zip \
-              --file logzio_function.zip \
               --overwrite
         
 
