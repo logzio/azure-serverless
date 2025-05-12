@@ -33,7 +33,8 @@ ENV_THREAD_COUNT = int(os.getenv('THREAD_COUNT', 4))
 ENV_BUFFER_SIZE = int(os.getenv('BUFFER_SIZE', 100))  # Batch size
 ENV_INTERVAL_TIME = int(os.getenv('INTERVAL_TIME', 10000)) / 1000  # Interval time in seconds
 
-tc = TelemetryClient(APPINSIGHTS_INSTRUMENTATIONKEY)
+appinsights_key = os.getenv("APPINSIGHTS_INSTRUMENTATIONKEY")
+tc = TelemetryClient(appinsights_key) if appinsights_key else None
 batch_queue = Queue()
 container_client = ContainerClient.from_connection_string(
       conn_str=AzureWebJobsStorage,
@@ -67,8 +68,9 @@ def send_batch(batch_data):
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to send batch: {e}")
         backup_container.write_event_to_blob(batch_data, e)
-        tc.track_metric('FailedLogSendCount', len(batch_data))
-        tc.flush()
+        if tc:
+          tc.track_metric('FailedLogSendCount', len(batch_data))
+          tc.flush()
         raise e
 
 
