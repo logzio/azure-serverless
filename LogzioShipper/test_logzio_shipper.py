@@ -12,7 +12,10 @@ import datetime
 import requests
 from dotenv import load_dotenv
 
-# Configure logging
+import azure.functions as func
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from LogzioShipper.__init__ import main
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger()
 
@@ -36,11 +39,6 @@ def setup_environment():
         os.environ[key] = value
     logger.info("Environment variables set successfully")
 
-setup_environment()
-
-import azure.functions as func
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from LogzioShipper.__init__ import main
 
 class MockEventHubEvent:
     def __init__(self, body):
@@ -139,6 +137,7 @@ def fetch_and_assert(run_id, api_key, timeout=120, interval=5):
 
 def main_test():
     logger.setLevel(logging.DEBUG)
+    setup_environment()
 
     run_id = uuid.uuid4().hex
     logger.info(f"Starting E2E test with run_id={run_id}")
