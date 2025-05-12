@@ -35,7 +35,7 @@ jobs:
         pytest -v LogzioShipper/test_logzio_shipper.py --log-cli-level=INFO
         
     - name: Upload test artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-logs
