@@ -53,5 +53,7 @@ jobs:
             --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }} \
             --file logzio_function/logzio_function.zip \
             --container-name eventhub \
-            --name logzio_function-${{ github.event.release.tag_name }}.zip
+            --name logzio_function-${{ github.event.release.tag_name }}.zip \
+            --overwrite true
+
             
