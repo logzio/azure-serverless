@@ -36,7 +36,8 @@ Use these settings when configuring the template:
 |-----------------|-------------------------------------------------------------------------|
 | Resource group* | Create a new resource group or select an existing one.                  |
 | Region*         | Select the region closest to your Azure services.                       |
-| LogzioURL*      | Use the listener URL specific to your Logz.io account region.           |
+| LogzioURL*      | Select a predefined listener URL for your region, or choose CUSTOM to specify your own. |
+| CustomLogzioURL | Custom listener URL (e.g., https://listener-custom.logz.io:8071). Required only when LogzioURL is set to CUSTOM. |
 | LogzioToken*    | Your Logz.io logs shipping token.                                       |
 | ThreadCount     | Number of threads for the Function App (default: 4).                    |
 | bufferSize      | Maximum number of messages to accumulate before sending (default: 100). |
@@ -70,6 +71,14 @@ The deployment includes a backup mechanism for logs that fail to ship to Logz.io
 
 To modify configuration after deployment, visit your Function App's **Configuration** tab. You can adjust settings such as `LogzioURL`, `LogzioToken`, `bufferSize`, and more.
 
+#### Using Custom Listener URLs
+
+If your Logz.io account uses a custom listener URL not available in the predefined list:
+
+1. **ARM Template**: Select "CUSTOM" from the LogzioURL dropdown, then provide your full custom URL in the CustomLogzioURL field (e.g., `https://listener-custom.logz.io:8071`).
+
+2. **Terraform**: Set the `logzio_url` variable directly to your custom URL in your `.tfvars` file.
+
 ---
 
 ## Alternative Setup using Terraform
@@ -91,7 +100,7 @@ As an alternative to the Azure Template, you can use Terraform to set up your lo
 
 2. **Create a `.tfvars` File**: Create a `terraform.tfvars` file in the same folder to specify your configurations, such as your Logz.io token.
     ```hcl
-    logzio_url = "https://<<LISTENER-HOST>>:8071"
+    logzio_url = "https://listener-custom.logz.io:8071"  # Replace with your actual listener URL
     logzio_token = "<<LOG-SHIPPING-TOKEN>>"
     thread_count = 4
     buffer_size = 100
@@ -113,7 +122,12 @@ As an alternative to the Azure Template, you can use Terraform to set up your lo
 
 ---
 ## Changelog
-
+- 0.0.4:
+  * Support for custom Logz.io listener URLs in ARM template deployments
+- 0.0.3:
+  * `add_timestamp`: Now adds `@timestamp` field to logs based on the `time` field
+  * `delete_empty_fields_of_log`: Removes empty or null fields from logs
+  * Enable running without app insights and a log analytics workspace (contributed by @athiedepayit)
 - 0.0.2:
   * Added `ENV_FUNCTION_VERSION` parameter for dynamic versioning in ARM template and Terraform.
   * FunctionAppVersion now dynamically matches the ARM template's contentVersion.
