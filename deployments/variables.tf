@@ -11,6 +11,11 @@ variable "failed_log_backup_container" {
 variable "logzio_url" {
   description = "The Logz.io listener URL for your region."
   default     = "https://listener.logz.io:8071"
+  
+  validation {
+    condition     = can(regex("^https://[A-Za-z0-9.-]+(:[0-9]+)?$", var.logzio_url))
+    error_message = "logzio_url must be a valid HTTPS URL, e.g., https://listener-custom.logz.io:8071."
+  }
 }
 
 variable "logzio_token" {

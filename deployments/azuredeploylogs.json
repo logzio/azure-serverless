@@ -33,11 +33,21 @@
                 "https://listener-eu.logz.io:8071",
                 "https://listener-nl.logz.io:8071",
                 "https://listener-uk.logz.io:8071",
-                "https://listener-wa.logz.io:8071"
+                "https://listener-wa.logz.io:8071",
+                "CUSTOM"
             ],
             "metadata":
             {
-                "description": "The Logz.io listener URL for your region."
+                "description": "Select a predefined Logz.io listener URL for your region, or CUSTOM to provide your own."
+            }
+        },
+        "CustomLogzioURL":
+        {
+            "type": "string",
+            "defaultValue": "",
+            "metadata":
+            {
+                "description": "Custom Logz.io listener URL (e.g., https://listener-custom.logz.io:8071). Used only when LogzioURL is set to CUSTOM."
             }
         },
         "LogzioToken":
@@ -255,7 +265,7 @@
                         },
                         {
                             "name": "LogzioURL",
-                            "value": "[parameters('LogzioURL')]"
+                            "value": "[if(equals(parameters('LogzioURL'), 'CUSTOM'), parameters('CustomLogzioURL'), parameters('LogzioURL'))]"
                         },
                         {
                             "name": "LogzioToken",
