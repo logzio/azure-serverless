@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Support for custom Logz.io listener URLs in ARM template deployments
-  - Added "CUSTOM" option to LogzioURL parameter dropdown
-  - Added CustomLogzioURL parameter for specifying custom listener URLs
+  - Added "CUSTOM" option to `LogzioURL` parameter dropdown
+  - Added `CustomLogzioURL` parameter for specifying custom listener URLs
 - Azure Key Vault integration for secure token storage
   - Added `UseKeyVaultForToken` parameter to enable Key Vault usage
   - Added `LogzioTokenSecretUri` parameter for specifying Key Vault secret URI
