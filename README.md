@@ -79,6 +79,13 @@ For enhanced security, you can store your Logz.io token in an existing Azure Key
    KeyVaultResourceId: /subscriptions/12345678-1234-1234-1234-123456789abc/resourceGroups/my-rg/providers/Microsoft.KeyVault/vaults/my-keyvault
    LogzioToken: (leave empty)
    ```
+#### Using Custom Listener URLs
+
+If your Logz.io account uses a custom listener URL not available in the predefined list:
+
+- **ARM Template**: Select "CUSTOM" from the LogzioURL dropdown, then provide your full custom URL in the CustomLogzioURL field (e.g., `https://listener-custom.logz.io:8071`).
+
+- **Terraform**: Set the `logzio_url` variable directly to your custom URL in your `.tfvars` file.
 
 ### 3. Stream Azure Service Data
 
@@ -101,13 +108,6 @@ The deployment includes a backup mechanism for logs that fail to ship to Logz.io
 
 To modify configuration after deployment, visit your Function App's **Configuration** tab. You can adjust settings such as `LogzioURL`, `LogzioToken`, `bufferSize`, and more.
 
-#### Using Custom Listener URLs
-
-If your Logz.io account uses a custom listener URL not available in the predefined list:
-
-1. **ARM Template**: Select "CUSTOM" from the LogzioURL dropdown, then provide your full custom URL in the CustomLogzioURL field (e.g., `https://listener-custom.logz.io:8071`).
-
-2. **Terraform**: Set the `logzio_url` variable directly to your custom URL in your `.tfvars` file.
 
 ---
 
@@ -130,7 +130,7 @@ As an alternative to the Azure Template, you can use Terraform to set up your lo
 
 2. **Create a `.tfvars` File**: Create a `terraform.tfvars` file in the same folder to specify your configurations, such as your Logz.io token.
     ```hcl
-    logzio_url = "https://listener-custom.logz.io:8071"  # Replace with your actual listener URL
+    logzio_url = "https://<<LISTENER-HOST>>:8071"  # Replace with your actual listener URL
     logzio_token = "<<LOG-SHIPPING-TOKEN>>"
     thread_count = 4
     buffer_size = 100
