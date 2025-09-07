@@ -1,6 +1,6 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "0.0.0.3",
+    "contentVersion": "0.0.0.4",
     "parameters":
     {
         "FunctionAppVersion": {
@@ -33,20 +33,51 @@
                 "https://listener-eu.logz.io:8071",
                 "https://listener-nl.logz.io:8071",
                 "https://listener-uk.logz.io:8071",
-                "https://listener-wa.logz.io:8071"
+                "https://listener-wa.logz.io:8071",
+                "CUSTOM"
             ],
             "metadata":
             {
-                "description": "The Logz.io listener URL for your region."
+                "description": "Select a predefined Logz.io listener URL for your region, or CUSTOM to provide your own."
+            }
+        },
+        "CustomLogzioURL":
+        {
+            "type": "string",
+            "defaultValue": "",
+            "metadata":
+            {
+                "description": "Custom Logz.io listener URL (e.g., https://listener-custom.logz.io:8071). Used only when LogzioURL is set to CUSTOM."
+            }
+        },
+        "UseKeyVaultForToken": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "If true, read LogzioToken from an existing Key Vault secret reference."
+            }
+        },
+        "LogzioTokenSecretUri": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Full Key Vault Secret URI (prefer versioned), e.g. https://<kv>.vault.azure.net/secrets/<name>/<version>. Required when UseKeyVaultForToken is true."
+            }
+        },
+        "KeyVaultResourceId": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Resource ID of the existing Key Vault, e.g. /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.KeyVault/vaults/<kv>. Required when UseKeyVaultForToken is true."
             }
         },
         "LogzioToken":
         {
-            "minLength": 1,
             "type": "string",
+            "defaultValue": "",
             "metadata":
             {
-                "description": "Your Logz.io logs token."
+                "description": "Your Logz.io logs token. Leave empty if UseKeyVaultForToken is true."
             }
         },
         "AppServicePlanName":
@@ -219,6 +250,9 @@
             "name": "[variables('FunctionAppName')]",
             "location": "[parameters('location')]",
             "kind": "functionapp,linux",
+            "identity": {
+                "type": "SystemAssigned"
+            },
             "dependsOn":
             [
                 "[resourceId('Microsoft.Web/serverfarms', parameters('AppServicePlanName'))]",
@@ -255,11 +289,11 @@
                         },
                         {
                             "name": "LogzioURL",
-                            "value": "[parameters('LogzioURL')]"
+                            "value": "[if(equals(parameters('LogzioURL'), 'CUSTOM'), parameters('CustomLogzioURL'), parameters('LogzioURL'))]"
                         },
                         {
                             "name": "LogzioToken",
-                            "value": "[parameters('LogzioToken')]"
+                            "value": "[if(parameters('UseKeyVaultForToken'), concat('@Microsoft.KeyVault(SecretUri=', parameters('LogzioTokenSecretUri'), ')'), parameters('LogzioToken'))]"
                         },
                         {
                             "name": "AzureWebJobsEventHubConnectionString",
@@ -362,6 +396,21 @@
               "applicationId": "[parameters('AppInsightsName')]",
 			  "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('LogAnalyticsWorkspaceName'))]"
             }
+        },
+        {
+            "condition": "[parameters('UseKeyVaultForToken')]",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2022-04-01",
+            "name": "[guid(parameters('KeyVaultResourceId'), variables('FunctionAppName'), 'kv-secrets-user')]",
+            "scope": "[parameters('KeyVaultResourceId')]",
+            "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]",
+                "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('FunctionAppName')), '2020-12-01', 'Full').identity.principalId]",
+                "principalType": "ServicePrincipal"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', variables('FunctionAppName'))]"
+            ]
         }
     ]
 }

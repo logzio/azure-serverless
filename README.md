@@ -36,8 +36,12 @@ Use these settings when configuring the template:
 |-----------------|-------------------------------------------------------------------------|
 | Resource group* | Create a new resource group or select an existing one.                  |
 | Region*         | Select the region closest to your Azure services.                       |
-| LogzioURL*      | Use the listener URL specific to your Logz.io account region.           |
-| LogzioToken*    | Your Logz.io logs shipping token.                                       |
+| LogzioURL*      | Select a predefined listener URL for your region, or choose CUSTOM to specify your own. |
+| CustomLogzioURL | Custom listener URL (e.g., https://listener-custom.logz.io:8071). Required only when LogzioURL is set to CUSTOM. |
+| UseKeyVaultForToken | If true, read LogzioToken from an existing Key Vault secret reference (default: false). |
+| LogzioTokenSecretUri | Full Key Vault Secret URI (prefer versioned), e.g., https://kv-name.vault.azure.net/secrets/secret-name/version. Required when UseKeyVaultForToken is true. |
+| KeyVaultResourceId | Resource ID of the existing Key Vault, e.g., /subscriptions/sub-id/resourceGroups/rg-name/providers/Microsoft.KeyVault/vaults/kv-name. Required when UseKeyVaultForToken is true. |
+| LogzioToken     | Your Logz.io logs shipping token. Leave empty if UseKeyVaultForToken is true. |
 | ThreadCount     | Number of threads for the Function App (default: 4).                    |
 | bufferSize      | Maximum number of messages to accumulate before sending (default: 100). |
 | intervalTime    | Interval time for sending logs in milliseconds (default: 10000).        |
@@ -45,9 +49,43 @@ Use these settings when configuring the template:
 | logType         | The type of the logs being processed (default: eventHub).               |
 
 
-*Required fields.
+*Required fields (LogzioURL and Region are always required; either LogzioToken OR the Key Vault parameters are required).
 
 After setting the parameters, click **Review + Create**, and then **Create** to deploy.
+
+#### Using Azure Key Vault for Token Storage
+
+For enhanced security, you can store your Logz.io token in an existing Azure Key Vault instead of providing it directly as a parameter:
+
+1. **Prerequisites**:
+   - An existing Azure Key Vault with your Logz.io logs token stored as a secret
+   - The deploying user/service principal must have permissions to assign roles on the Key Vault (e.g., "User Access Administrator" or "Owner" role)
+
+2. **Configuration**:
+   - Set `UseKeyVaultForToken` to `true`
+   - Provide the `LogzioTokenSecretUri` (full secret URI, preferably versioned for deterministic behavior)
+   - Provide the `KeyVaultResourceId` (full resource ID of your Key Vault)
+   - Leave `LogzioToken` empty
+
+3. **What happens during deployment**:
+   - The Function App is created with a system-assigned managed identity
+   - The managed identity is automatically granted the "Key Vault Secrets User" role on your Key Vault
+   - The Function App's `LogzioToken` setting is configured as a Key Vault reference
+
+4. **Example values**:
+   ```
+   UseKeyVaultForToken: true
+   LogzioTokenSecretUri: https://my-keyvault.vault.azure.net/secrets/logzio-token/abc123def456
+   KeyVaultResourceId: /subscriptions/12345678-1234-1234-1234-123456789abc/resourceGroups/my-rg/providers/Microsoft.KeyVault/vaults/my-keyvault
+   LogzioToken: (leave empty)
+   ```
+#### Using Custom Listener URLs
+
+If your Logz.io account uses a custom listener URL not available in the predefined list:
+
+- **ARM Template**: Select "CUSTOM" from the LogzioURL dropdown, then provide your full custom URL in the CustomLogzioURL field (e.g., `https://listener-custom.logz.io:8071`).
+
+- **Terraform**: Set the `logzio_url` variable directly to your custom URL in your `.tfvars` file.
 
 ### 3. Stream Azure Service Data
 
@@ -70,6 +108,7 @@ The deployment includes a backup mechanism for logs that fail to ship to Logz.io
 
 To modify configuration after deployment, visit your Function App's **Configuration** tab. You can adjust settings such as `LogzioURL`, `LogzioToken`, `bufferSize`, and more.
 
+
 ---
 
 ## Alternative Setup using Terraform
@@ -91,7 +130,7 @@ As an alternative to the Azure Template, you can use Terraform to set up your lo
 
 2. **Create a `.tfvars` File**: Create a `terraform.tfvars` file in the same folder to specify your configurations, such as your Logz.io token.
     ```hcl
-    logzio_url = "https://<<LISTENER-HOST>>:8071"
+    logzio_url = "https://<<LISTENER-HOST>>:8071"  # Replace with your actual listener URL
     logzio_token = "<<LOG-SHIPPING-TOKEN>>"
     thread_count = 4
     buffer_size = 100
@@ -113,7 +152,12 @@ As an alternative to the Azure Template, you can use Terraform to set up your lo
 
 ---
 ## Changelog
-
+- 0.0.4:
+  * Support for custom Logz.io listener URLs in ARM template deployments
+- 0.0.3:
+  * `add_timestamp`: Now adds `@timestamp` field to logs based on the `time` field
+  * `delete_empty_fields_of_log`: Removes empty or null fields from logs
+  * Enable running without app insights and a log analytics workspace (contributed by @athiedepayit)
 - 0.0.2:
   * Added `ENV_FUNCTION_VERSION` parameter for dynamic versioning in ARM template and Terraform.
   * FunctionAppVersion now dynamically matches the ARM template's contentVersion.

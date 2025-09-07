@@ -5,6 +5,20 @@ All notable changes to the Logz.io Azure Serverless project will be documented i
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.4]
+
+### Added
+- Support for custom Logz.io listener URLs in ARM template deployments
+  - Added "CUSTOM" option to `LogzioURL` parameter dropdown
+  - Added `CustomLogzioURL` parameter for specifying custom listener URLs
+- Azure Key Vault integration for secure token storage
+  - Added `UseKeyVaultForToken` parameter to enable Key Vault usage
+  - Added `LogzioTokenSecretUri` parameter for specifying Key Vault secret URI
+  - Added `KeyVaultResourceId` parameter for existing Key Vault resource ID
+  - Function App now created with system-assigned managed identity
+  - Automatic RBAC role assignment ("Key Vault Secrets User") on existing Key Vault
+  - Support for versioned and versionless Key Vault secret references
+
 ## [0.0.3]
 
 ### Added
