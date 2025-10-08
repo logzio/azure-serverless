@@ -129,14 +129,15 @@ As an alternative to the Azure Template, you can use Terraform to set up your lo
    ```
 
 2. **Create a `.tfvars` File**: Create a `terraform.tfvars` file in the same folder to specify your configurations, such as your Logz.io token.
-    ```hcl
-    logzio_url = "https://<<LISTENER-HOST>>:8071"  # Replace with your actual listener URL
-    logzio_token = "<<LOG-SHIPPING-TOKEN>>"
-    thread_count = 4
-    buffer_size = 100
-    interval_time = 10000
-    max_tries = 3
-    log_type = "eventHub"
+   ```hcl
+   subscription_id = "<<AZURE-SUBSCRIPTION-ID>>"  # Replace with your Azure subscription ID
+   logzio_url = "https://<<LISTENER-HOST>>:8071"  # Replace with your actual listener URL
+   logzio_token = "<<LOG-SHIPPING-TOKEN>>" # Replace with your actual log shipping token
+   thread_count = 4
+   buffer_size = 100
+   interval_time = 10000
+   max_tries = 3
+   log_type = "eventHub"
    
 3. **Initialize Terraform**: Run the Terraform initialization to install the necessary plugins.
    ```bash
