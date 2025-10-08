@@ -1,5 +1,6 @@
 provider "azurerm" {
   features {}
+  subscription_id = var.subscription_id
 }
 # Storage Account
 resource "random_string" "random_suffix" {
@@ -32,7 +33,7 @@ resource "null_resource" "wait_for_namespace" {
 # Data source for authorization rule
 data "azurerm_eventhub_namespace_authorization_rule" "example" {
   name                = "RootManageSharedAccessKey"
-  namespace_name      = azurerm_eventhub_namespace.eventhub_namespace.name
+  namespace_id      = azurerm_eventhub_namespace.eventhub_namespace.id
   resource_group_name = var.resource_group_name
 
   # Enforce dependency via null_resource
@@ -54,20 +55,20 @@ resource "azurerm_storage_account" "storage_account" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
   access_tier              = "Hot"
-  enable_https_traffic_only = true
+  https_traffic_only_enabled = true
 }
 
 # Blob Container
 resource "azurerm_storage_container" "storage_container" {
   name                  = var.failed_log_backup_container
-  storage_account_name  = azurerm_storage_account.storage_account.name
+  storage_account_id  = azurerm_storage_account.storage_account.id
   container_access_type = "private"
 }
 
 # Event Hub
 resource "azurerm_eventhub" "event_hub" {
   name                = var.eventhub_logs_name
-  namespace_name      = azurerm_eventhub_namespace.eventhub_namespace.name
+  namespace_id      = azurerm_eventhub_namespace.eventhub_namespace.id
   resource_group_name = var.resource_group_name
   partition_count     = 32
   message_retention   = 7
@@ -89,7 +90,7 @@ resource "azurerm_linux_function_app" "function_app" {
   resource_group_name        = var.resource_group_name
 
   service_plan_id            = azurerm_service_plan.app_service_plan.id
-  storage_account_name       = azurerm_storage_account.storage_account.name
+  storage_account_id       = azurerm_storage_account.storage_account.id
   storage_account_access_key = azurerm_storage_account.storage_account.primary_access_key
 
   site_config {

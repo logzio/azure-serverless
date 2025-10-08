@@ -72,3 +72,9 @@ variable "resource_group_name" {
   default = "resources-terraform-test"
 }
 
+variable "subscription_id" {
+  description = "Azure subscription ID"
+  type        = string
+  default     = ""  # Default empty, user must provide
+}
+
