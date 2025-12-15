@@ -78,3 +78,9 @@ variable "subscription_id" {
   default     = ""  # Default empty, user must provide
 }
 
+variable "enable_storage_infrastructure_encryption" {
+  description = "Enable infrastructure encryption for the storage account (double encryption). Note: Can only be set at storage account creation time."
+  type        = bool
+  default     = false
+}
+

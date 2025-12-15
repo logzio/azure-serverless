@@ -184,6 +184,13 @@
             "metadata": {
                 "description": "The type of the logs being processed."
             }
+        },
+        "EnableStorageInfrastructureEncryption": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Enable infrastructure encryption for the storage account (double encryption). Note: Can only be set at storage account creation time."
+            }
         }
     },
     "variables":
@@ -213,7 +220,8 @@
                   "enabled": true
                 }
               },
-              "keySource": "Microsoft.Storage"
+              "keySource": "Microsoft.Storage",
+              "requireInfrastructureEncryption": "[parameters('EnableStorageInfrastructureEncryption')]"
             },
             "accessTier": "Hot"
           },
