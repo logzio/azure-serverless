@@ -49,13 +49,14 @@ locals {
 }
 
 resource "azurerm_storage_account" "storage_account" {
-  name                     = local.storage_account_name
-  resource_group_name      = var.resource_group_name
-  location                 = azurerm_resource_group.resource_group.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  access_tier              = "Hot"
-  https_traffic_only_enabled = true
+  name                              = local.storage_account_name
+  resource_group_name               = var.resource_group_name
+  location                          = azurerm_resource_group.resource_group.location
+  account_tier                      = "Standard"
+  account_replication_type          = "LRS"
+  access_tier                       = "Hot"
+  https_traffic_only_enabled        = true
+  infrastructure_encryption_enabled = var.enable_storage_infrastructure_encryption
 }
 
 # Blob Container
